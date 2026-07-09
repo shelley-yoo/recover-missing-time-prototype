@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Toggl Focus — Recover Missing Time</title>
+<style>
+  :root{
+    --sidebar-bg: #1a1625;
+    --sidebar-text: #a8a2b8;
+    --sidebar-text-active: #ffffff;
+    --sidebar-highlight: #2d2640;
+    --accent-purple: #7c3aed;
+    --accent-pink: #d81b6a;
+    --bg: #ffffff;
+    --bg-soft: #fafafa;
+    --border: #e6e4ea;
+    --text: #1f1b2e;
+    --text-muted: #6b6478;
+    --text-faint: #9891a4;
+
+    --c-admin: #3d6b4f;
+    --c-admin-bg: #e7f0e9;
+    --c-internal: #c2185b;
+    --c-internal-bg: #fbe4ee;
+    --c-new: #d98324;
+    --c-new-bg: #fbead2;
+    --c-test: #8a4b12;
+    --c-test-bg: #f2e2d0;
+    --c-focus: #5b4fc4;
+    --c-focus-bg: #eae7fb;
+
+    --gap-glow: #eab308;
+    --success: #1f9d55;
+  }
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0; padding:0; height:100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, Roboto, Helvetica, Arial, sans-serif;
+    color:var(--text);
+    background:var(--bg);
+    font-size:14px;
+  }
+  .app{ display:flex; height:100vh; min-height:600px; overflow:hidden; }
+
+  /* SIDEBAR */
+  .sidebar{
+    width:210px; flex-shrink:0; background:var(--sidebar-bg);
+    display:flex; flex-direction:column; padding:16px 12px;
+  }
+  .org{ display:flex; align-items:center; gap:8px; padding:4px 6px 18px 6px; }
+  .org-avatar{
+    width:26px; height:26px; border-radius:50%;
+    background: radial-gradient(circle at 30% 30%, var(--accent-pink), var(--accent-purple));
+    flex-shrink:0;
+  }
+  .org-name{ color:var(--sidebar-text-active); font-size:13px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .nav-label{ color:#655d78; font-size:10.5px; font-weight:700; letter-spacing:.06em; margin:14px 8px 6px; }
+  .nav-item{
+    display:flex; align-items:center; gap:10px; color:var(--sidebar-text);
+    padding:7px 8px; border-radius:7px; font-size:13.5px; cursor:default; margin-bottom:1px;
+  }
+  .nav-item svg{ width:15px; height:15px; flex-shrink:0; opacity:.85; }
+  .nav-item.active{ background:var(--sidebar-highlight); color:var(--sidebar-text-active); }
+  .nav-item.active svg{ opacity:1; }
+  .sidebar-spacer{ flex:1; }
+  .sidebar-foot{ color:#5c5470; font-size:11.5px; padding:6px 8px; }
+
+  /* MAIN */
+  .main{ flex:1; display:flex; flex-direction:column; min-width:0; background:var(--bg); }
+
+  .topbar{
+    display:flex; align-items:center; gap:10px;
+    padding:16px 24px; border-bottom:1px solid var(--border);
+  }
+  .topbar h1{ font-size:19px; font-weight:600; margin:0; flex-shrink:0; }
+  .pill{
+    display:flex; align-items:center; gap:6px;
+    border:1px solid var(--border); border-radius:7px; padding:6px 10px;
+    font-size:12.5px; color:var(--text-muted); white-space:nowrap;
+  }
+  .pill.tasklist{ color:var(--c-internal); background:var(--c-internal-bg); border-color:transparent; }
+  .pill.project{ color:var(--c-new); background:var(--c-new-bg); border-color:transparent; }
+  .topbar-spacer{ flex:1; }
+  .timer-display{
+    font-variant-numeric: tabular-nums; font-size:15px; font-weight:600;
+    border:1px solid var(--border); border-radius:7px; padding:7px 14px; color:var(--text-muted);
+  }
+  .play-btn{
+    width:34px; height:34px; border-radius:50%; border:none;
+    background:var(--accent-purple); color:#fff; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; flex-shrink:0;
+  }
+  .play-btn svg{ width:13px; height:13px; }
+
+  .summary-row{
+    display:flex; align-items:center; gap:24px; padding:12px 24px; border-bottom:1px solid var(--border);
+    font-size:12px; color:var(--text-muted);
+  }
+  .summary-item{ display:flex; align-items:center; gap:10px; flex:1; min-width:0; }
+  .summary-label{ flex-shrink:0; font-weight:600; color:var(--text-faint); }
+  .summary-bar{ flex:1; height:6px; border-radius:3px; background:var(--border); overflow:hidden; display:flex; }
+  .summary-bar span{ height:100%; }
+  .summary-total{ flex-shrink:0; font-weight:600; color:var(--text); }
+
+  .week-nav{
+    display:flex; align-items:center; padding:10px 24px; border-bottom:1px solid var(--border);
+    gap:16px; font-size:13px; color:var(--text-muted);
+  }
+  .week-nav .current{ font-weight:600; color:var(--text); }
+
+  /* GRID */
+  .grid-wrap{ flex:1; overflow-y:auto; position:relative; }
+  .grid{
+    display:grid;
+    grid-template-columns: 54px repeat(5, 1fr);
+  }
+  .day-head{
+    padding:10px 8px 6px; border-bottom:1px solid var(--border); border-left:1px solid var(--border);
+    position:sticky; top:0; background:var(--bg); z-index:5;
+  }
+  .day-head.today{ color:var(--accent-purple); }
+  .day-head .dnum{ font-size:17px; font-weight:600; }
+  .day-head .dname{ font-size:11px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.03em; }
+  .corner{ border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--bg); z-index:5; }
+
+  .allday-row{ display:contents; }
+  .allday-cell{
+    border-left:1px solid var(--border); border-bottom:1px solid var(--border);
+    padding:6px; min-height:auto; display:flex; flex-direction:column; gap:4px;
+  }
+  .allday-label{ border-bottom:1px solid var(--border); }
+
+  .chip{
+    border-radius:5px; padding:4px 7px; font-size:11px; font-weight:600; line-height:1.3;
+    display:flex; flex-direction:column; gap:1px;
+  }
+  .chip .sub{ font-weight:400; opacity:.85; font-size:10.5px; }
+  .chip.admin{ background:var(--c-admin-bg); color:var(--c-admin); }
+  .chip.internal{ background:var(--c-internal-bg); color:var(--c-internal); }
+  .chip.new{ background:var(--c-new-bg); color:var(--c-new); }
+  .chip.focus{ background:var(--c-focus-bg); color:var(--c-focus); }
+
+  .hours-col{ position:relative; }
+  .hour-label{
+    height:56px; text-align:right; padding-right:8px; font-size:10.5px; color:var(--text-faint);
+    border-left:1px solid transparent; transform:translateY(-6px);
+  }
+  .day-col{ border-left:1px solid var(--border); position:relative; }
+  .hour-cell{ height:56px; border-bottom:1px solid #f1f0f4; position:relative; }
+  .hour-cell:hover{ background:#fbfaff; }
+
+  .block{
+    position:absolute; left:3px; right:3px; border-radius:6px; padding:5px 7px;
+    font-size:11px; font-weight:600; overflow:hidden; cursor:default; z-index:2;
+    box-shadow: 0 1px 2px rgba(0,0,0,.04);
+  }
+  .block .sub{ font-weight:400; opacity:.85; font-size:10px; margin-top:1px; }
+  .block.admin{ background:var(--c-admin); color:#fff; }
+  .block.internal{ background:var(--c-internal); color:#fff; }
+  .block.new{ background:var(--c-new); color:#fff; }
+  .block.test{ background:var(--c-test); color:#fff; }
+  .block.focus{ background:var(--c-focus); color:#fff; }
+
+  .chip.planned-chip{ border:1.5px dashed currentColor; background:transparent; }
+
+  /* GAP MARKER */
+  .gap-marker{
+    position:absolute; left:3px; right:3px; border-radius:6px;
+    border:1.5px dashed var(--gap-glow); background:rgba(234,179,8,.09);
+    z-index:1; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    transition: background .15s ease, box-shadow .15s ease;
+  }
+  .gap-marker:hover{ background:rgba(234,179,8,.18); box-shadow:0 0 0 3px rgba(234,179,8,.12); }
+  .gap-marker .dot{
+    width:8px; height:8px; border-radius:50%; background:var(--gap-glow);
+    box-shadow:0 0 0 4px rgba(234,179,8,.25);
+    animation: pulse 2.2s ease-in-out infinite;
+  }
+  .gap-marker .gm-label{
+    font-size:10.5px; font-weight:600; color:#92660a; margin-left:6px; white-space:nowrap;
+  }
+  @keyframes pulse{
+    0%,100%{ box-shadow:0 0 0 4px rgba(234,179,8,.25); }
+    50%{ box-shadow:0 0 0 7px rgba(234,179,8,.12); }
+  }
+  .gap-marker.dismissed{
+    border-color:#d8d5df; background:#f5f4f7; cursor:default;
+  }
+  .gap-marker.dismissed .dot{ display:none; }
+  .gap-marker.dismissed .gm-label{ color:var(--text-faint); }
+  .gap-marker.dismissed:hover{ background:#f5f4f7; box-shadow:none; }
+
+  /* PANEL */
+  .overlay{
+    position:fixed; inset:0; background:rgba(20,16,30,.28);
+    opacity:0; pointer-events:none; transition:opacity .18s ease; z-index:20;
+  }
+  .overlay.open{ opacity:1; pointer-events:auto; }
+
+  .panel{
+    position:fixed; top:0; right:0; bottom:0; width:380px; background:#fff;
+    box-shadow:-8px 0 24px rgba(20,16,30,.12); transform:translateX(100%);
+    transition:transform .22s cubic-bezier(.2,.8,.2,1); z-index:21;
+    display:flex; flex-direction:column;
+  }
+  .panel.open{ transform:translateX(0); }
+  .panel-head{
+    display:flex; align-items:center; gap:10px; padding:16px 18px; border-bottom:1px solid var(--border);
+  }
+  .panel-head .icon{
+    width:26px; height:26px; border-radius:7px; background:#fef3c7; color:#92660a;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .panel-head h2{ font-size:14.5px; margin:0; font-weight:600; }
+  .panel-head .close{
+    margin-left:auto; width:26px; height:26px; border:none; background:none; cursor:pointer;
+    color:var(--text-faint); font-size:16px; border-radius:6px;
+  }
+  .panel-head .close:hover{ background:var(--bg-soft); }
+  .panel-body{ padding:18px; overflow-y:auto; flex:1; }
+  .panel-note{
+    font-size:12.5px; color:var(--text-muted); line-height:1.55; margin:0 0 18px;
+    background:#fffbeb; border:1px solid #fde68a; border-radius:8px; padding:10px 12px;
+  }
+  .field-row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 0; border-bottom:1px solid #f1f0f4; gap:12px;
+  }
+  .field-label{ font-size:12.5px; color:var(--text-faint); flex-shrink:0; display:flex; align-items:center; gap:7px; }
+  .field-label svg{ width:14px; height:14px; opacity:.7; }
+  .field-value{ font-size:13px; font-weight:500; text-align:right; }
+  .time-inputs{ display:flex; align-items:center; gap:6px; }
+  .time-inputs input{
+    font-size:12.5px; border:1px solid var(--border); border-radius:6px; padding:5px 7px;
+    width:74px; text-align:center; font-family:inherit; color:var(--text);
+  }
+  .time-inputs input:focus{ outline:2px solid var(--accent-purple); outline-offset:1px; }
+  .arrow{ color:var(--text-faint); font-size:12px; }
+
+  .suggestion-card{
+    margin-top:16px; border:1px solid var(--border); border-radius:10px; padding:13px 14px;
+    background:var(--bg-soft);
+  }
+  .suggestion-card .eyebrow{
+    font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em;
+    color:var(--text-faint); margin-bottom:8px;
+  }
+  .suggestion-task{ display:flex; align-items:center; gap:10px; }
+  .suggestion-task .badge{
+    width:30px; height:30px; border-radius:7px; background:var(--c-new-bg); color:var(--c-new);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .suggestion-task .badge svg{ width:15px; height:15px; }
+  .suggestion-task .tinfo{ min-width:0; }
+  .suggestion-task .ttitle{ font-size:13.5px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .suggestion-task .tmeta{ font-size:11.5px; color:var(--text-muted); margin-top:1px; }
+  .suggestion-why{ font-size:11.5px; color:var(--text-faint); margin-top:10px; line-height:1.5; }
+
+  .desc-input{
+    width:100%; margin-top:16px; border:1px solid var(--border); border-radius:8px;
+    padding:9px 11px; font-size:13px; font-family:inherit; color:var(--text); resize:none;
+  }
+  .desc-input:focus{ outline:2px solid var(--accent-purple); outline-offset:1px; border-color:transparent; }
+  .desc-label{ font-size:11.5px; color:var(--text-faint); margin-top:16px; margin-bottom:6px; display:block; }
+
+  .panel-foot{ padding:14px 18px; border-top:1px solid var(--border); display:flex; gap:8px; }
+  .btn{
+    flex:1; border:none; border-radius:8px; padding:10px 12px; font-size:13px; font-weight:600;
+    cursor:pointer; font-family:inherit;
+  }
+  .btn-primary{ background:var(--accent-purple); color:#fff; }
+  .btn-primary:hover{ background:#6b2fd6; }
+  .btn-ghost{ background:none; color:var(--text-muted); border:1px solid var(--border); }
+  .btn-ghost:hover{ background:var(--bg-soft); }
+
+  /* TOAST */
+  .toast{
+    position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(12px);
+    background:#1f1b2e; color:#fff; padding:10px 18px; border-radius:9px; font-size:13px;
+    display:flex; align-items:center; gap:9px; opacity:0; pointer-events:none;
+    transition:opacity .2s ease, transform .2s ease; z-index:30; box-shadow:0 8px 24px rgba(0,0,0,.25);
+  }
+  .toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+  .toast .tick{
+    width:16px; height:16px; border-radius:50%; background:var(--success);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .toast .tick svg{ width:9px; height:9px; }
+
+  .reset-btn{
+    position:fixed; top:16px; right:20px; z-index:15;
+    background:#fff; border:1px solid var(--border); border-radius:7px; padding:7px 12px;
+    font-size:11.5px; color:var(--text-muted); cursor:pointer; font-family:inherit;
+    box-shadow:0 2px 6px rgba(0,0,0,.06);
+  }
+  .reset-btn:hover{ background:var(--bg-soft); }
+
+  .intro-banner{
+    position:fixed; top:16px; left:50%; transform:translateX(-50%) translateY(-8px);
+    background:#1f1b2e; color:#fff; padding:11px 16px; border-radius:10px; font-size:12.5px;
+    display:flex; align-items:center; gap:12px; z-index:16; box-shadow:0 8px 24px rgba(0,0,0,.22);
+    opacity:0; pointer-events:none; transition:opacity .25s ease, transform .25s ease; max-width:480px;
+  }
+  .intro-banner.show{ opacity:1; transform:translateX(-50%) translateY(0); pointer-events:auto; }
+  .intro-banner strong{ font-weight:600; }
+  .intro-banner .ib-dismiss{
+    background:none; border:none; color:#a8a2b8; cursor:pointer; font-size:14px; flex-shrink:0; padding:2px;
+  }
+  .intro-banner .ib-dot{
+    width:7px; height:7px; border-radius:50%; background:var(--gap-glow); flex-shrink:0;
+    box-shadow:0 0 0 3px rgba(234,179,8,.3);
+  }
+</style>
+</head>
+<body>
+
+<button class="reset-btn" onclick="resetDemo()">↺ Reset demo</button>
+
+<div class="intro-banner" id="introBanner">
+  <span class="ib-dot"></span>
+  <span><strong>Recover Missing Time</strong> — Thursday has an untracked gap. Click the marker in the grid to see it.</span>
+  <button class="ib-dismiss" onclick="dismissIntro()">✕</button>
+</div>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="org">
+      <div class="org-avatar"></div>
+      <div class="org-name">Shelley Yoo's organi...</div>
+    </div>
+    <div class="nav-label">TRACK</div>
+    <div class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+      Timer
+    </div>
+    <div class="nav-label">ANALYZE</div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19h16M7 15v3M12 9v9M17 5v13"/></svg>
+      Reports
+    </div>
+    <div class="nav-label">PLAN</div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M3 12h18M3 17h18"/></svg>
+      Projects
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3 8-8M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+      Tasks
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M7 15l4-4 3 3 5-6"/></svg>
+      Timeline
+    </div>
+    <div class="nav-label">MANAGE</div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.3 3-6 7-6s7 2.7 7 6M17 11a3 3 0 100-6M23 20c0-2.7-2-5-5-5.5"/></svg>
+      Members
+    </div>
+    <div class="sidebar-spacer"></div>
+    <div class="sidebar-foot">29d left on trial</div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <h1>What are you working on?</h1>
+      <div class="pill">@ Task</div>
+      <div class="pill">+ Project</div>
+      <div class="pill"># Tags</div>
+      <div class="topbar-spacer"></div>
+      <div class="timer-display">0:00:00</div>
+      <button class="play-btn">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+    </div>
+
+    <div class="summary-row">
+      <div class="summary-item">
+        <span class="summary-label">Logged</span>
+        <div class="summary-bar">
+          <span style="width:22%; background:var(--c-admin)"></span>
+          <span style="width:18%; background:var(--c-internal)"></span>
+          <span style="width:14%; background:var(--c-test)"></span>
+        </div>
+        <span class="summary-total">4h 32m</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">Planned</span>
+        <div class="summary-bar">
+          <span style="width:30%; background:var(--c-new)"></span>
+          <span style="width:15%; background:var(--c-admin)"></span>
+        </div>
+        <span class="summary-total">4h 11m</span>
+      </div>
+    </div>
+
+    <div class="week-nav">
+      <span>‹</span>
+      <span class="current">📅 This week · W28</span>
+      <span>›</span>
+    </div>
+
+    <div class="grid-wrap">
+      <div class="grid" id="grid">
+        <div class="corner"></div>
+        <div class="day-head"><div class="dname">Mon</div><div class="dnum">6</div></div>
+        <div class="day-head"><div class="dname">Tue</div><div class="dnum">7</div></div>
+        <div class="day-head"><div class="dname">Wed</div><div class="dnum">8</div></div>
+        <div class="day-head today"><div class="dname">Thu</div><div class="dnum">9</div></div>
+        <div class="day-head"><div class="dname">Fri</div><div class="dnum">10</div></div>
+
+        <div class="allday-cell allday-label"></div>
+        <div class="allday-cell"></div>
+        <div class="allday-cell">
+          <div class="chip internal">Client call<span class="sub">Kimchi Digital</span></div>
+        </div>
+        <div class="allday-cell"></div>
+        <div class="allday-cell">
+          <div class="chip admin">Weekly sync<span class="sub">Admin & Comms</span></div>
+          <div class="chip internal planned-chip">📅 Revise homepage copy<span class="sub">Kimchi Digital · Planned</span></div>
+        </div>
+        <div class="allday-cell">
+          <div class="chip new">Content editing<span class="sub">Blog · UStudio</span></div>
+          <div class="chip focus">Focus time<span class="sub">No project</span></div>
+        </div>
+
+        <div class="hours-col" id="hours-col"></div>
+        <div class="day-col" id="col-mon"></div>
+        <div class="day-col" id="col-tue"></div>
+        <div class="day-col" id="col-wed"></div>
+        <div class="day-col" id="col-thu"></div>
+        <div class="day-col" id="col-fri"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closePanel()"></div>
+
+<div class="panel" id="panel">
+  <div class="panel-head">
+    <div class="icon">
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4l2.5 2.5"/></svg>
+    </div>
+    <h2>Possible missing time</h2>
+    <button class="close" onclick="closePanel()">✕</button>
+  </div>
+  <div class="panel-body">
+    <p class="panel-note">Thursday 2:00 PM – 3:30 PM doesn't have a timer or a plan. Here's what it might have been — edit anything that's off.</p>
+
+    <div class="field-row">
+      <div class="field-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        Time
+      </div>
+      <div class="time-inputs">
+        <input type="text" id="fromTime" value="2:00 PM">
+        <span class="arrow">→</span>
+        <input type="text" id="toTime" value="3:30 PM">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="field-label">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M3 12h18M3 17h18"/></svg>
+        Duration
+      </div>
+      <div class="field-value">1h 30m</div>
+    </div>
+
+    <div class="suggestion-card">
+      <div class="eyebrow">Suggested from your tasks</div>
+      <div class="suggestion-task">
+        <div class="badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3 8-8M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+        </div>
+        <div class="tinfo">
+          <div class="ttitle">Prep interview questions</div>
+          <div class="tmeta">Hiring · Northwind Talent · 1.5h estimated</div>
+        </div>
+      </div>
+      <div class="suggestion-why">This task is due today, estimated at 1.5h, and has no time logged yet.</div>
+    </div>
+
+    <label class="desc-label">Description</label>
+    <input type="text" class="desc-input" id="descInput" value="Prep interview questions">
+  </div>
+  <div class="panel-foot">
+    <button class="btn btn-ghost" onclick="dismissGap()">Not work time</button>
+    <button class="btn btn-primary" onclick="acceptGap()">Log this time</button>
+  </div>
+</div>
+
+<div class="toast" id="toast">
+  <div class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>
+  <span id="toastText">Time logged</span>
+</div>
+
+<script>
+const HOURS = [8,9,10,11,12,13,14,15,16,17,18];
+const startHour = HOURS[0];
+const pxPerHour = 56;
+
+function timeToTop(h, m){ return (h - startHour) * pxPerHour + (m/60)*pxPerHour; }
+
+function buildHours(){
+  const col = document.getElementById('hours-col');
+  HOURS.forEach(h=>{
+    const d = document.createElement('div');
+    d.className='hour-label';
+    const disp = h % 12 === 0 ? 12 : h % 12;
+    const ampm = h < 12 ? 'AM' : 'PM';
+    d.textContent = disp + ' ' + ampm;
+    col.appendChild(d);
+  });
+}
+
+function buildDayCells(colId){
+  const col = document.getElementById(colId);
+  HOURS.forEach(()=>{
+    const c = document.createElement('div');
+    c.className='hour-cell';
+    col.appendChild(c);
+  });
+}
+
+function addBlock(colId, top, height, cls, title, sub, extra){
+  const col = document.getElementById(colId);
+  const b = document.createElement('div');
+  b.className = 'block ' + cls + (extra?(' '+extra):'');
+  b.style.top = top+'px';
+  b.style.height = Math.max(height,26)+'px';
+  b.innerHTML = (cls==='planned' ? '<span class="cal-icon">🗓</span>' : '') + title + (sub ? '<div class="sub">'+sub+'</div>' : '');
+  col.appendChild(b);
+  return b;
+}
+
+buildHours();
+['col-mon','col-tue','col-wed','col-thu','col-fri'].forEach(buildDayCells);
+
+// Monday context
+addBlock('col-mon', timeToTop(11,0), 84, 'new', 'Content editing', 'Blog · UStudio · 1h30m');
+
+// Tuesday context
+addBlock('col-tue', timeToTop(12,45), 40, 'internal', 'Client call', 'Kimchi Digital · 40m');
+
+// Thursday (today) — the story
+addBlock('col-thu', timeToTop(9,0), 56, 'admin', 'Emails & Slack', 'Admin & Comms');
+addBlock('col-thu', timeToTop(11,0), 30, 'admin', 'Weekly sync', 'Admin & Comms');
+
+// (Kimchi Digital's planned-but-unlogged item now lives in the all-day strip above, matching the real product's pattern)
+
+// The unplanned gap — flagged
+const gapTop = timeToTop(14,0);
+const gapHeight = 84; // 1.5h
+const gapMarker = document.createElement('div');
+gapMarker.className = 'gap-marker';
+gapMarker.style.top = gapTop+'px';
+gapMarker.style.height = gapHeight+'px';
+gapMarker.id = 'gapMarker';
+gapMarker.innerHTML = '<span class="dot"></span><span class="gm-label">Possible missing time</span>';
+gapMarker.onclick = openPanel;
+document.getElementById('col-thu').appendChild(gapMarker);
+
+// Friday context
+addBlock('col-fri', timeToTop(15,0), 56, 'new', 'Content editing', 'Blog · UStudio · 1h');
+addBlock('col-fri', timeToTop(16,0), 56, 'focus', 'Focus time', 'No project · 1h');
+
+let recovered = false;
+
+function openPanel(){
+  if(recovered) return;
+  dismissIntro();
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('panel').classList.add('open');
+}
+function dismissIntro(){
+  document.getElementById('introBanner').classList.remove('show');
+}
+setTimeout(()=>{ document.getElementById('introBanner').classList.add('show'); }, 500);
+function closePanel(){
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('panel').classList.remove('open');
+}
+function showToast(text){
+  const t = document.getElementById('toast');
+  document.getElementById('toastText').textContent = text;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2400);
+}
+function acceptGap(){
+  const desc = document.getElementById('descInput').value || 'Prep interview questions';
+  const from = document.getElementById('fromTime').value;
+  const to = document.getElementById('toTime').value;
+  const marker = document.getElementById('gapMarker');
+  const top = parseFloat(marker.style.top);
+  const height = parseFloat(marker.style.height);
+  marker.remove();
+  addBlock('col-thu', top, height, 'test', desc, 'Hiring · Northwind Talent · '+from+' – '+to);
+  closePanel();
+  recovered = true;
+  showToast('Time logged — 1h 30m');
+}
+function dismissGap(){
+  const marker = document.getElementById('gapMarker');
+  marker.classList.add('dismissed');
+  marker.innerHTML = '<span class="gm-label">Marked as not work time</span>';
+  marker.onclick = null;
+  closePanel();
+  recovered = true;
+  showToast('Got it — won\\'t flag this again');
+}
+function resetDemo(){ location.reload(); }
+</script>
+
+</body>
+</html>
