@@ -311,6 +311,32 @@
     width:7px; height:7px; border-radius:50%; background:var(--gap-glow); flex-shrink:0;
     box-shadow:0 0 0 3px rgba(234,179,8,.3);
   }
+
+  /* FLOATER — read-only info card for existing blocks/chips */
+  .block, .chip{ cursor:pointer; }
+  .floater{
+    position:fixed; width:250px; background:#fff; border-radius:10px;
+    box-shadow:0 12px 32px rgba(20,16,30,.18), 0 0 0 1px var(--border);
+    z-index:22; opacity:0; transform:translateY(4px) scale(.98); pointer-events:none;
+    transition:opacity .12s ease, transform .12s ease;
+  }
+  .floater.show{ opacity:1; transform:translateY(0) scale(1); pointer-events:auto; }
+  .floater-head{ display:flex; align-items:center; gap:8px; padding:11px 12px 8px; }
+  .floater-swatch{ width:9px; height:9px; border-radius:3px; flex-shrink:0; }
+  .floater-type{ font-size:10px; font-weight:700; letter-spacing:.05em; color:var(--text-faint); flex:1; }
+  .floater-close{
+    border:none; background:none; color:var(--text-faint); cursor:pointer; font-size:13px;
+    width:20px; height:20px; border-radius:5px; flex-shrink:0;
+  }
+  .floater-close:hover{ background:var(--bg-soft); }
+  .floater-title{ font-size:14px; font-weight:600; padding:0 12px 10px; }
+  .floater-pills{ display:flex; gap:6px; padding:0 12px 10px; flex-wrap:wrap; }
+  .floater-pill{ font-size:11px; font-weight:500; padding:4px 8px; border-radius:6px; white-space:nowrap; }
+  .floater-meta{
+    display:flex; align-items:center; gap:6px; padding:9px 12px; border-top:1px solid #f1f0f4;
+    font-size:11.5px; color:var(--text-muted);
+  }
+  .floater-meta svg{ width:13px; height:13px; opacity:.7; flex-shrink:0; }
 </style>
 </head>
 <body>
@@ -492,6 +518,20 @@
   </div>
 </div>
 
+<div class="floater" id="floater">
+  <div class="floater-head">
+    <span class="floater-swatch" id="floaterSwatch"></span>
+    <span class="floater-type" id="floaterType">LOGGED</span>
+    <button class="floater-close" onclick="closeFloater()">✕</button>
+  </div>
+  <div class="floater-title" id="floaterTitle">Title</div>
+  <div class="floater-pills" id="floaterPills"></div>
+  <div class="floater-meta">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+    <span id="floaterMeta"></span>
+  </div>
+</div>
+
 <div class="toast" id="toast">
   <div class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>
   <span id="toastText">Time logged</span>
@@ -525,13 +565,14 @@ function buildDayCells(colId){
   });
 }
 
-function addBlock(colId, top, height, cls, title, sub, extra){
+function addBlock(colId, top, height, cls, title, sub, meta){
   const col = document.getElementById(colId);
   const b = document.createElement('div');
-  b.className = 'block ' + cls + (extra?(' '+extra):'');
+  b.className = 'block ' + cls;
   b.style.top = top+'px';
   b.style.height = Math.max(height,26)+'px';
-  b.innerHTML = (cls==='planned' ? '<span class="cal-icon">🗓</span>' : '') + title + (sub ? '<div class="sub">'+sub+'</div>' : '');
+  b.innerHTML = title + (sub ? '<div class="sub">'+sub+'</div>' : '');
+  if(meta){ b.onclick = (e)=>{ e.stopPropagation(); openFloater(b, meta); }; }
   col.appendChild(b);
   return b;
 }
@@ -540,16 +581,20 @@ buildHours();
 ['col-mon','col-tue','col-wed','col-thu','col-fri'].forEach(buildDayCells);
 
 // Monday context
-addBlock('col-mon', timeToTop(11,0), 84, 'new', 'Content editing', 'Blog · UStudio · 1h30m');
+addBlock('col-mon', timeToTop(11,0), 84, 'new', 'Content editing', 'Blog · UStudio · 1h30m',
+  {type:'LOGGED', title:'Content editing', task:'Content editing', project:'UStudio', color:'--c-new', date:'Mon, Jul 6', time:'11:00 AM → 12:30 PM', duration:'1h 30m'});
 
 // Tuesday context
-addBlock('col-tue', timeToTop(12,45), 40, 'internal', 'Client call', 'Kimchi Digital · 40m');
+addBlock('col-tue', timeToTop(12,45), 40, 'internal', 'Client call', 'Kimchi Digital · 40m',
+  {type:'LOGGED', title:'Client call', task:'Client call', project:'Kimchi Digital', color:'--c-internal', date:'Tue, Jul 7', time:'12:45 PM → 1:25 PM', duration:'40m'});
 
 // Thursday (today) — the story
-addBlock('col-thu', timeToTop(9,0), 56, 'admin', 'Emails & Slack', 'Admin & Comms');
-addBlock('col-thu', timeToTop(11,0), 30, 'admin', 'Weekly sync', 'Admin & Comms');
+addBlock('col-thu', timeToTop(9,0), 56, 'admin', 'Emails & Slack', 'Admin & Comms',
+  {type:'LOGGED', title:'Emails & Slack', task:'Emails & Slack', project:'Admin & Comms', color:'--c-admin', date:'Thu, Jul 9', time:'9:00 AM → 10:00 AM', duration:'1h'});
+addBlock('col-thu', timeToTop(11,0), 30, 'admin', 'Weekly sync', 'Admin & Comms',
+  {type:'LOGGED', title:'Weekly sync', task:'Weekly sync', project:'Admin & Comms', color:'--c-admin', date:'Thu, Jul 9', time:'11:00 AM → 11:30 AM', duration:'30m'});
 
-// (Kimchi Digital's planned-but-unlogged item now lives in the all-day strip above, matching the real product's pattern)
+// (Kimchi Digital's planned-but-unlogged item lives in the all-day strip above, matching the real product's pattern)
 
 // The unplanned gap — flagged
 const gapTop = timeToTop(14,0);
@@ -560,17 +605,43 @@ gapMarker.style.top = gapTop+'px';
 gapMarker.style.height = gapHeight+'px';
 gapMarker.id = 'gapMarker';
 gapMarker.innerHTML = '<span class="dot"></span><span class="gm-label">Possible missing time</span>';
-gapMarker.onclick = openPanel;
+gapMarker.onclick = (e)=>{ e.stopPropagation(); openPanel(); };
 document.getElementById('col-thu').appendChild(gapMarker);
 
 // Friday context
-addBlock('col-fri', timeToTop(15,0), 56, 'new', 'Content editing', 'Blog · UStudio · 1h');
-addBlock('col-fri', timeToTop(16,0), 56, 'focus', 'Focus time', 'No project · 1h');
+addBlock('col-fri', timeToTop(15,0), 56, 'new', 'Content editing', 'Blog · UStudio · 1h',
+  {type:'LOGGED', title:'Content editing', task:'Content editing', project:'UStudio', color:'--c-new', date:'Fri, Jul 10', time:'3:00 PM → 4:00 PM', duration:'1h'});
+addBlock('col-fri', timeToTop(16,0), 56, 'focus', 'Focus time', 'No project · 1h',
+  {type:'LOGGED', title:'Focus time', task:'Focus time', project:'No project', color:'--c-focus', date:'Fri, Jul 10', time:'4:00 PM → 5:00 PM', duration:'1h'});
+
+// Wire up click handlers on the static all-day chips
+function wireChip(chip, meta){
+  chip.onclick = (e)=>{ e.stopPropagation(); openFloater(chip, meta); };
+}
+document.querySelectorAll('.allday-cell .chip').forEach(chip=>{
+  const title = chip.childNodes[0].textContent.replace('📅 ','').trim();
+  const sub = chip.querySelector('.sub') ? chip.querySelector('.sub').textContent : '';
+  const isPlanned = chip.classList.contains('planned-chip');
+  let color = '--c-admin';
+  if(chip.classList.contains('internal')) color = '--c-internal';
+  if(chip.classList.contains('new')) color = '--c-new';
+  if(chip.classList.contains('focus')) color = '--c-focus';
+  wireChip(chip, {
+    type: isPlanned ? 'PLANNED' : 'LOGGED',
+    title: title, task: title,
+    project: sub.split('·').pop().trim(),
+    color: color,
+    date: 'Thu, Jul 9',
+    time: isPlanned ? 'No specific time yet' : '',
+    duration: isPlanned ? '' : ''
+  });
+});
 
 let recovered = false;
 
 function openPanel(){
   if(recovered) return;
+  closeFloater();
   dismissIntro();
   document.getElementById('overlay').classList.add('open');
   document.getElementById('panel').classList.add('open');
@@ -589,6 +660,39 @@ function showToast(text){
   t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'), 2400);
 }
+
+// FLOATER — read-only info card for existing blocks/chips
+function openFloater(anchorEl, meta){
+  const f = document.getElementById('floater');
+  document.getElementById('floaterType').textContent = meta.type;
+  document.getElementById('floaterSwatch').style.background = 'var('+meta.color+')';
+  document.getElementById('floaterTitle').textContent = meta.title;
+  const pillsHtml = [
+    meta.task ? '<span class="floater-pill" style="background:var('+meta.color+'-bg,#f1f0f4);color:var('+meta.color+')">'+meta.task+'</span>' : '',
+    meta.project ? '<span class="floater-pill" style="background:#f1f0f4;color:var(--text-muted)">'+meta.project+'</span>' : ''
+  ].join('');
+  document.getElementById('floaterPills').innerHTML = pillsHtml;
+  const metaParts = [meta.date, meta.time, meta.duration].filter(Boolean);
+  document.getElementById('floaterMeta').textContent = metaParts.join(' · ');
+  const rect = anchorEl.getBoundingClientRect();
+  const floaterWidth = 250;
+  let left = rect.right + 10;
+  if(left + floaterWidth > window.innerWidth - 12){ left = rect.left - floaterWidth - 10; }
+  if(left < 12){ left = Math.min(rect.left, window.innerWidth - floaterWidth - 12); }
+  let top = rect.top;
+  if(top + 160 > window.innerHeight - 12){ top = window.innerHeight - 172; }
+  f.style.left = left + 'px';
+  f.style.top = top + 'px';
+  f.classList.add('show');
+}
+function closeFloater(){
+  document.getElementById('floater').classList.remove('show');
+}
+document.addEventListener('click', (e)=>{
+  const f = document.getElementById('floater');
+  if(f.classList.contains('show') && !f.contains(e.target)){ closeFloater(); }
+});
+
 function acceptGap(){
   const desc = document.getElementById('descInput').value || 'Prep interview questions';
   const from = document.getElementById('fromTime').value;
@@ -597,7 +701,8 @@ function acceptGap(){
   const top = parseFloat(marker.style.top);
   const height = parseFloat(marker.style.height);
   marker.remove();
-  addBlock('col-thu', top, height, 'test', desc, 'Hiring · Northwind Talent · '+from+' – '+to);
+  addBlock('col-thu', top, height, 'test', desc, 'Hiring · Northwind Talent · '+from+' – '+to,
+    {type:'LOGGED', title:desc, task:desc, project:'Northwind Talent', color:'--c-test', date:'Thu, Jul 9', time:from+' → '+to, duration:'1h 30m'});
   closePanel();
   recovered = true;
   showToast('Time logged — 1h 30m');
