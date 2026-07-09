@@ -176,10 +176,10 @@
   .allday-label{ border-bottom:1px solid var(--border); }
 
   .chip{
-    border-radius:5px; padding:4px 7px; font-size:11px; font-weight:600; line-height:1.3;
-    display:flex; flex-direction:column; gap:1px;
+    border-radius:5px; padding:5px 8px; font-size:11.5px; font-weight:700; line-height:1.3;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
   }
-  .chip .sub{ font-weight:400; opacity:.85; font-size:10.5px; }
+  .chip .sub{ font-weight:400; opacity:.85; }
   .chip.admin{ background:var(--c-admin-bg); color:var(--c-admin); }
   .chip.internal{ background:var(--c-internal-bg); color:var(--c-internal); }
   .chip.new{ background:var(--c-new-bg); color:var(--c-new); }
@@ -206,7 +206,6 @@
   .block.test{ background:var(--c-test); color:#fff; }
   .block.focus{ background:var(--c-focus); color:#fff; }
 
-  .chip.planned-chip{ border:1.5px dashed currentColor; background:transparent; }
 
   /* GAP MARKER — tinted with the top-suggested project's colour (light = not yet logged) */
   .gap-marker{
@@ -606,16 +605,16 @@
         <div class="allday-cell allday-label"></div>
         <div class="allday-cell"></div>
         <div class="allday-cell">
-          <div class="chip internal">Client call<span class="sub">Kimchi Digital</span></div>
+          <div class="chip internal"><b>Client call</b> · <span class="sub">Kimchi Digital</span></div>
         </div>
         <div class="allday-cell"></div>
         <div class="allday-cell">
-          <div class="chip admin">Weekly sync<span class="sub">Admin & Comms</span></div>
-          <div class="chip internal planned-chip">📅 Revise homepage copy<span class="sub">Kimchi Digital · Planned</span></div>
+          <div class="chip admin"><b>Weekly sync</b> · <span class="sub">Admin & Comms</span></div>
+          <div class="chip internal" data-type="planned"><b>Revise homepage copy</b> · <span class="sub">Kimchi Digital</span></div>
         </div>
         <div class="allday-cell">
-          <div class="chip new">Content editing<span class="sub">Blog · UStudio</span></div>
-          <div class="chip focus">Focus time<span class="sub">No project</span></div>
+          <div class="chip new"><b>Content editing</b> · <span class="sub">Blog · UStudio</span></div>
+          <div class="chip focus"><b>Focus time</b> · <span class="sub">No project</span></div>
         </div>
 
         <div class="hours-col" id="hours-col"></div>
@@ -857,9 +856,10 @@ function wireChip(chip, meta){
   chip.onclick = (e)=>{ e.stopPropagation(); openFloater(chip, meta); };
 }
 document.querySelectorAll('.allday-cell .chip').forEach(chip=>{
-  const title = chip.childNodes[0].textContent.replace('📅 ','').trim();
+  const b = chip.querySelector('b');
+  const title = b ? b.textContent.trim() : chip.textContent.trim();
   const sub = chip.querySelector('.sub') ? chip.querySelector('.sub').textContent : '';
-  const isPlanned = chip.classList.contains('planned-chip');
+  const isPlanned = chip.dataset.type === 'planned';
   let color = '--c-admin';
   if(chip.classList.contains('internal')) color = '--c-internal';
   if(chip.classList.contains('new')) color = '--c-new';
