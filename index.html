@@ -687,12 +687,13 @@
         <div class="allday-cell">
           <div class="chip internal" data-task="clientcall"><b>Client call</b> · <span class="sub">Kimchi Digital</span></div>
         </div>
-        <div class="allday-cell"></div>
+        <div class="allday-cell">
+          <div class="chip new" data-task="content"><b>Content editing</b> · <span class="sub">Blog · UStudio</span></div>
+        </div>
         <div class="allday-cell">
           <div class="chip internal" data-type="planned" data-task="revise"><b>Revise homepage copy</b> · <span class="sub">Kimchi Digital</span></div>
         </div>
         <div class="allday-cell">
-          <div class="chip new" data-task="content"><b>Content editing</b> · <span class="sub">Blog · UStudio</span></div>
           <div class="chip focus" data-task="focustime"><b>Focus time</b> · <span class="sub">No project</span></div>
         </div>
 
@@ -1034,16 +1035,18 @@ addCalendarBlock('col-thu', timeToTop(14,0), 28, 'Design sync',
 addBlock('col-thu', timeToTop(15,15), 28, 'admin', 'Slack catch-up', 'Admin & Comms',
   {type:'LOGGED', title:'Slack catch-up', task:'Slack catch-up', project:'Admin & Comms', color:'--c-admin', date:'Thu, Jul 9', time:'3:15 PM → 3:45 PM', duration:'30m'});
 
-// Friday context — a couple of other meetings, then a wide-open stretch of the day
-addBlock('col-fri', timeToTop(9,0), 30, 'admin', 'Standup', 'Admin & Comms',
-  {type:'LOGGED', title:'Standup', task:'Standup', project:'Admin & Comms', color:'--c-admin', date:'Fri, Jul 10', time:'9:00 AM → 9:30 AM', duration:'30m'});
-addBlock('col-fri', timeToTop(12,0), 30, 'internal', 'Client check-in', 'Kimchi Digital',
-  {type:'LOGGED', title:'Client check-in', task:'Client check-in', project:'Kimchi Digital', color:'--c-internal', date:'Fri, Jul 10', time:'12:00 PM → 12:30 PM', duration:'30m'});
-// (Content editing is planned for today with a 3h estimate — see the chip above — but never got a time slot)
+// Wednesday context — a couple of other meetings, then a wide-open stretch of the day.
+// This is the day BEFORE today (Thursday), which is what "prior working day" detection actually means —
+// a gap on Friday would be in the future, which the detection logic explicitly can't flag.
+addBlock('col-wed', timeToTop(9,0), 30, 'admin', 'Standup', 'Admin & Comms',
+  {type:'LOGGED', title:'Standup', task:'Standup', project:'Admin & Comms', color:'--c-admin', date:'Wed, Jul 8', time:'9:00 AM → 9:30 AM', duration:'30m'});
+addBlock('col-wed', timeToTop(12,0), 30, 'internal', 'Client check-in', 'Kimchi Digital',
+  {type:'LOGGED', title:'Client check-in', task:'Client check-in', project:'Kimchi Digital', color:'--c-internal', date:'Wed, Jul 8', time:'12:00 PM → 12:30 PM', duration:'30m'});
+// (Content editing was planned for Wednesday with a 3h estimate — see the chip above — but never got a time slot)
 
-// Bounds the right side of the Friday gap
-addBlock('col-fri', timeToTop(17,0), 30, 'admin', 'Wrap-up', 'Admin & Comms',
-  {type:'LOGGED', title:'Wrap-up', task:'Wrap-up', project:'Admin & Comms', color:'--c-admin', date:'Fri, Jul 10', time:'5:00 PM → 5:30 PM', duration:'30m'});
+// Bounds the right side of the Wednesday gap
+addBlock('col-wed', timeToTop(17,0), 30, 'admin', 'Wrap-up', 'Admin & Comms',
+  {type:'LOGGED', title:'Wrap-up', task:'Wrap-up', project:'Admin & Comms', color:'--c-admin', date:'Wed, Jul 8', time:'5:00 PM → 5:30 PM', duration:'30m'});
 
 // GAP MARKERS — colored to match each gap's top-suggested project (light = not yet logged)
 const RGB_MAP = { '--c-internal':'194,24,91', '--c-new':'217,131,36', '--c-test':'138,75,18', '--c-admin':'61,107,79', '--c-focus':'91,79,196' };
@@ -1072,21 +1075,21 @@ const GAP_CONFIGS = {
     fromLabel:'2:30 PM', toLabel:'3:15 PM', defaultTask:'revise', defaultProject:'kimchi',
     note:"Thursday 2:30 PM – 3:15 PM doesn't have a timer or a plan. Here's what it might have been — edit anything that's off."
   },
-  'fri-gap': {
-    colId:'col-fri', markerTop:timeToTop(13,0), markerHeight:224, colorVar:'--c-new',
+  'wed-gap': {
+    colId:'col-wed', markerTop:timeToTop(13,0), markerHeight:224, colorVar:'--c-new',
     fromLabel:'1:00 PM', toLabel:'4:00 PM', defaultTask:'content', defaultProject:'ustudio',
-    note:"Friday 1:00 PM – 5:00 PM has no timer or plan. Content editing is estimated at 3h and hasn't been logged yet — here's a starting point; the rest of the window is still open if this doesn't cover it all."
+    note:"Wednesday 1:00 PM – 5:00 PM has no timer or plan. Content editing was estimated at 3h and hasn't been logged yet — here's a starting point; the rest of the window is still open if this doesn't cover it all."
   }
 };
 createGapMarker('thu-gap', 'col-thu', GAP_CONFIGS['thu-gap'].markerTop, GAP_CONFIGS['thu-gap'].markerHeight, GAP_CONFIGS['thu-gap'].colorVar);
-createGapMarker('fri-gap', 'col-fri', GAP_CONFIGS['fri-gap'].markerTop, GAP_CONFIGS['fri-gap'].markerHeight, GAP_CONFIGS['fri-gap'].colorVar);
+createGapMarker('wed-gap', 'col-wed', GAP_CONFIGS['wed-gap'].markerTop, GAP_CONFIGS['wed-gap'].markerHeight, GAP_CONFIGS['wed-gap'].colorVar);
 
 // TASK POPUP / DRAWER — clicking a task chip opens a compact popup;
 // the expand icon inside it opens the full task drawer (Project, Estimate, Priority, etc.)
 const TASK_DETAILS = {
   clientcall: { title:'Client call',           project:'Kimchi Digital', color:'--c-internal', date:'Jul 7',  estimate:'–', priority:'Empty', entries:1 },
   revise:     { title:'Revise homepage copy',  project:'Kimchi Digital', color:'--c-internal', date:'Jul 9',  estimate:'–', priority:'Empty', entries:0 },
-  content:    { title:'Content editing',       project:'UStudio',        color:'--c-new',      date:'Jul 10', estimate:'3h', priority:'High',  entries:0 },
+  content:    { title:'Content editing',       project:'UStudio',        color:'--c-new',      date:'Jul 8', estimate:'3h', priority:'High',  entries:0 },
   focustime:  { title:'Focus time',            project:'No project',     color:'--c-focus',    date:'Jul 10', estimate:'–', priority:'Empty', entries:0 }
 };
 let currentTaskKey = null;
