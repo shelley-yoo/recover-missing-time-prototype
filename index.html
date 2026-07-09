@@ -205,27 +205,45 @@
   .block.new{ background:var(--c-new); color:#fff; }
   .block.test{ background:var(--c-test); color:#fff; }
   .block.focus{ background:var(--c-focus); color:#fff; }
+  .block.cal-event{
+    background:#c98b85; color:#fff; display:flex; align-items:center; justify-content:space-between; gap:6px;
+  }
+  .g-badge{
+    width:16px; height:16px; border-radius:50%; background:rgba(255,255,255,.25);
+    display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; flex-shrink:0;
+  }
+  .g-badge-header{
+    width:18px; height:18px; border-radius:50%; background:#f1f0f4; color:var(--text-muted);
+    display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0;
+  }
+  .floater-joinmeeting{
+    display:flex; align-items:center; gap:7px; margin:0 14px 12px; padding:9px 12px;
+    border:1px solid var(--border); border-radius:8px; background:none; font-size:12.5px; font-weight:600;
+    color:var(--text); cursor:pointer; font-family:inherit;
+  }
+  .floater-joinmeeting svg{ width:14px; height:14px; }
+  .floater-joinmeeting:hover{ background:var(--bg-soft); }
 
 
-  /* GAP MARKER — tinted with the top-suggested project's colour (light = not yet logged) */
+  /* GAP MARKER — tinted with each gap's top-suggested project colour (light = not yet logged) */
   .gap-marker{
     position:absolute; left:3px; right:3px; border-radius:6px;
-    border:1.5px dashed var(--c-test); background:var(--c-test-bg);
+    border:1.5px dashed var(--mc, var(--c-internal)); background:var(--mc-bg, var(--c-internal-bg));
     z-index:1; cursor:pointer; display:flex; align-items:center; justify-content:center;
     transition: background .15s ease, box-shadow .15s ease;
   }
-  .gap-marker:hover{ box-shadow:0 0 0 3px rgba(138,75,18,.15); }
+  .gap-marker:hover{ box-shadow:0 0 0 3px rgba(var(--mc-rgb, 194,24,91),.15); }
   .gap-marker .dot{
-    width:8px; height:8px; border-radius:50%; background:var(--c-test);
-    box-shadow:0 0 0 4px rgba(138,75,18,.25);
+    width:8px; height:8px; border-radius:50%; background:var(--mc, var(--c-internal));
+    box-shadow:0 0 0 4px rgba(var(--mc-rgb, 194,24,91),.25);
     animation: pulse 2.2s ease-in-out infinite;
   }
   .gap-marker .gm-label{
-    font-size:10.5px; font-weight:600; color:var(--c-test); margin-left:6px; white-space:nowrap;
+    font-size:10.5px; font-weight:600; color:var(--mc, var(--c-internal)); margin-left:6px; white-space:nowrap;
   }
   @keyframes pulse{
-    0%,100%{ box-shadow:0 0 0 4px rgba(138,75,18,.25); }
-    50%{ box-shadow:0 0 0 7px rgba(138,75,18,.12); }
+    0%,100%{ box-shadow:0 0 0 4px rgba(var(--mc-rgb, 194,24,91),.25); }
+    50%{ box-shadow:0 0 0 7px rgba(var(--mc-rgb, 194,24,91),.12); }
   }
   .gap-marker.dismissed{
     border-color:#d8d5df; background:#f5f4f7; cursor:default;
@@ -235,11 +253,6 @@
   .gap-marker.dismissed:hover{ background:#f5f4f7; box-shadow:none; }
 
   /* PANEL */
-  .overlay{
-    position:fixed; inset:0; background:rgba(20,16,30,.28);
-    opacity:0; pointer-events:none; transition:opacity .18s ease; z-index:20;
-  }
-  .overlay.open{ opacity:1; pointer-events:auto; }
 
   .panel{
     position:fixed; top:0; right:0; bottom:0; width:380px; background:#fff;
@@ -290,8 +303,12 @@
     color:var(--text-faint); margin-bottom:8px;
   }
   .pill-row{ display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+  .pill-wrap{ position:relative; display:inline-flex; align-items:center; }
+  .pill-icon{
+    position:absolute; left:9px; width:12px; height:12px; pointer-events:none; opacity:.85; color:inherit;
+  }
   .pill-select{
-    border:none; border-radius:7px; padding:6px 10px; font-size:12px; font-weight:600;
+    border:none; border-radius:7px; padding:6px 10px 6px 27px; font-size:12px; font-weight:600;
     font-family:inherit; cursor:pointer; background:var(--c-test-bg); color:var(--c-test);
     -webkit-appearance:none; appearance:none;
   }
@@ -458,6 +475,69 @@
   }
   .cf-save.active{ background:var(--accent-purple); color:#fff; cursor:pointer; }
   .cf-save.active:hover{ background:#6b2fd6; }
+
+  /* TASK POPUP — compact quick-view when clicking a task chip */
+  .task-popup{
+    position:fixed; width:300px; background:#fff; border-radius:12px;
+    box-shadow:0 12px 32px rgba(20,16,30,.18), 0 0 0 1px var(--border);
+    z-index:23; opacity:0; transform:translateY(4px) scale(.98); pointer-events:none;
+    transition:opacity .12s ease, transform .12s ease;
+  }
+  .task-popup.show{ opacity:1; transform:translateY(0) scale(1); pointer-events:auto; }
+  .tp-head{ display:flex; align-items:center; gap:10px; padding:14px 12px 6px 16px; }
+  .tp-checkbox{ width:18px; height:18px; border-radius:50%; border:1.5px solid var(--border); flex-shrink:0; }
+  .tp-title{ font-size:15px; font-weight:600; flex:1; }
+  .tp-icons{ display:flex; align-items:center; gap:2px; }
+  .tp-row{ display:flex; align-items:center; gap:9px; padding:8px 16px; font-size:12.5px; }
+  .tp-row svg{ width:14px; height:14px; opacity:.6; flex-shrink:0; }
+  .tp-dot{ width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+  .tp-row .tp-placeholder{ color:var(--text-faint); }
+  .tp-foot{ padding:10px 16px 16px; display:flex; justify-content:flex-end; }
+
+  /* TASK DRAWER — full task detail view, opened via the expand icon in the popup */
+  .task-drawer{
+    position:fixed; top:0; right:0; bottom:0; width:400px; background:#fff;
+    box-shadow:-8px 0 24px rgba(20,16,30,.12); transform:translateX(100%);
+    transition:transform .22s cubic-bezier(.2,.8,.2,1); z-index:24;
+    display:flex; flex-direction:column;
+  }
+  .task-drawer.open{ transform:translateX(0); }
+  .td-head{ display:flex; align-items:center; gap:9px; padding:16px 18px; border-bottom:1px solid var(--border); }
+  .td-swatch{ width:20px; height:20px; border-radius:6px; flex-shrink:0; }
+  .td-head .td-proj{ font-size:13px; font-weight:600; color:var(--text); flex:1; }
+  .td-head .td-icons{ display:flex; align-items:center; gap:3px; }
+  .td-body{ padding:18px; overflow-y:auto; flex:1; }
+  .td-title-row{ display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+  .td-title{ font-size:19px; font-weight:600; flex:1; }
+  .td-play{
+    width:36px; height:36px; border-radius:50%; border:none; background:var(--accent-purple); color:#fff;
+    display:flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
+  }
+  .td-play svg{ width:14px; height:14px; }
+  .td-desc-placeholder{ color:var(--text-faint); font-size:13.5px; margin-bottom:14px; }
+  .td-field{
+    display:flex; align-items:center; gap:12px; padding:11px 0; border-top:1px solid #f1f0f4; font-size:13px;
+  }
+  .td-field .td-label{ display:flex; align-items:center; gap:8px; color:var(--text-faint); width:110px; flex-shrink:0; }
+  .td-field .td-label svg{ width:15px; height:15px; opacity:.7; }
+  .td-field .td-value{ flex:1; font-weight:500; color:var(--text); display:flex; align-items:center; gap:6px; }
+  .td-field .td-value.empty{ color:var(--text-faint); font-weight:400; }
+  .td-lock{ color:var(--text-faint); }
+  .td-lock svg{ width:12px; height:12px; }
+  .td-avatar{
+    width:20px; height:20px; border-radius:50%; background:var(--c-internal); color:#fff;
+    font-size:9px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .td-toggle{ width:32px; height:18px; border-radius:9px; background:#e6e4ea; position:relative; margin-left:auto; }
+  .td-toggle::after{ content:''; position:absolute; top:2px; left:2px; width:14px; height:14px; border-radius:50%; background:#fff; }
+  .td-star{ color:#f0a83c; }
+  .td-star svg{ width:13px; height:13px; }
+  .td-section{
+    display:flex; align-items:center; gap:8px; padding:13px 0; border-top:1px solid #f1f0f4;
+    font-size:13.5px; font-weight:600; color:var(--text);
+  }
+  .td-section svg{ width:14px; height:14px; opacity:.6; }
+  .td-section .td-view{ margin-left:auto; font-size:12px; font-weight:500; color:var(--accent-purple); }
 </style>
 </head>
 <body>
@@ -605,16 +685,15 @@
         <div class="allday-cell allday-label"></div>
         <div class="allday-cell"></div>
         <div class="allday-cell">
-          <div class="chip internal"><b>Client call</b> · <span class="sub">Kimchi Digital</span></div>
+          <div class="chip internal" data-task="clientcall"><b>Client call</b> · <span class="sub">Kimchi Digital</span></div>
         </div>
         <div class="allday-cell"></div>
         <div class="allday-cell">
-          <div class="chip admin"><b>Weekly sync</b> · <span class="sub">Admin & Comms</span></div>
-          <div class="chip internal" data-type="planned"><b>Revise homepage copy</b> · <span class="sub">Kimchi Digital</span></div>
+          <div class="chip internal" data-type="planned" data-task="revise"><b>Revise homepage copy</b> · <span class="sub">Kimchi Digital</span></div>
         </div>
         <div class="allday-cell">
-          <div class="chip new"><b>Content editing</b> · <span class="sub">Blog · UStudio</span></div>
-          <div class="chip focus"><b>Focus time</b> · <span class="sub">No project</span></div>
+          <div class="chip new" data-task="content"><b>Content editing</b> · <span class="sub">Blog · UStudio</span></div>
+          <div class="chip focus" data-task="focustime"><b>Focus time</b> · <span class="sub">No project</span></div>
         </div>
 
         <div class="hours-col" id="hours-col"></div>
@@ -628,8 +707,6 @@
   </div>
 </div>
 
-<div class="overlay" id="overlay" onclick="closePanel()"></div>
-
 <div class="panel" id="panel">
   <div class="panel-head">
     <div class="icon">
@@ -639,7 +716,7 @@
     <button class="close" onclick="closePanel()">✕</button>
   </div>
   <div class="panel-body">
-    <p class="panel-note">Thursday 2:00 PM – 3:30 PM doesn't have a timer or a plan. Here's what it might have been — edit anything that's off.</p>
+    <p class="panel-note" id="panelNote">Thursday 2:30 PM – 3:15 PM doesn't have a timer or a plan. Here's what it might have been — edit anything that's off.</p>
 
     <div class="field-row">
       <div class="field-label">
@@ -647,9 +724,9 @@
         Time
       </div>
       <div class="time-inputs">
-        <input type="text" id="fromTime" value="2:00 PM">
+        <input type="text" id="fromTime" value="2:30 PM">
         <span class="arrow">→</span>
-        <input type="text" id="toTime" value="3:30 PM">
+        <input type="text" id="toTime" value="3:15 PM">
       </div>
     </div>
     <div class="field-row">
@@ -657,32 +734,39 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M3 12h18M3 17h18"/></svg>
         Duration
       </div>
-      <div class="field-value" id="durationDisplay">1h 30m</div>
+      <div class="field-value" id="durationDisplay">45m</div>
     </div>
 
     <div class="suggestion-card">
       <div class="eyebrow">Suggested from your tasks</div>
       <div class="pill-row">
-        <select id="taskPicker" class="pill-select">
-          <option value="prep" selected>Prep interview questions</option>
-          <option value="content">Content editing</option>
-          <option value="revise">Revise homepage copy</option>
-          <option value="custom">Custom entry…</option>
-        </select>
-        <select id="projectPicker" class="pill-select">
-          <option value="northwind">Northwind Talent</option>
-          <option value="ustudio">UStudio</option>
-          <option value="kimchi">Kimchi Digital</option>
-          <option value="admin">Admin & Comms</option>
-          <option value="none">No project</option>
-        </select>
+        <span class="pill-wrap">
+          <svg class="pill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3 8-8M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+          <select id="taskPicker" class="pill-select">
+            <option value="revise" selected>Revise homepage copy</option>
+            <option value="prep">Prep interview questions</option>
+            <option value="content">Content editing</option>
+            <option value="calendar">Shelley / Arushi (Calendar)</option>
+            <option value="custom">Custom entry…</option>
+          </select>
+        </span>
+        <span class="pill-wrap">
+          <svg class="pill-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>
+          <select id="projectPicker" class="pill-select">
+            <option value="kimchi" selected>Kimchi Digital</option>
+            <option value="northwind">Northwind Talent</option>
+            <option value="ustudio">UStudio</option>
+            <option value="admin">Admin & Comms</option>
+            <option value="none">No project</option>
+          </select>
+        </span>
         <span class="floater-pill tags">Tags</span>
       </div>
-      <div class="suggestion-why" id="suggestionWhy">This task is due today, estimated at 1.5h, and has no time logged yet.</div>
+      <div class="suggestion-why" id="suggestionWhy">Kimchi Digital is a project you already have planned work for today — this gap likely belongs to it, even though that work hasn't been scheduled to a specific time.</div>
     </div>
 
     <label class="desc-label">Description</label>
-    <input type="text" class="desc-input" id="descInput" value="Prep interview questions">
+    <input type="text" class="desc-input" id="descInput" value="Revise homepage copy">
   </div>
   <div class="panel-foot">
     <button class="btn btn-ghost" onclick="dismissGap()">Delete</button>
@@ -692,6 +776,7 @@
 
 <div class="floater" id="floater">
   <div class="floater-head">
+    <span class="g-badge-header" id="floaterCalIcon" style="display:none">G</span>
     <span class="floater-type" id="floaterType">LOGGED</span>
     <div class="floater-icons">
       <button class="floater-icon-btn play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>
@@ -716,7 +801,7 @@
   </div>
   <div class="floater-foot">
     <button class="floater-logtime" id="floaterLogTimeBtn" onclick="closeFloater()">Log time</button>
-    <button class="floater-save" onclick="closeFloater()">Save</button>
+    <button class="floater-save" id="floaterSaveBtn" onclick="closeFloater()">Save</button>
   </div>
 </div>
 
@@ -768,6 +853,100 @@
   </div>
 </div>
 
+<div class="task-popup" id="taskPopup">
+  <div class="tp-head">
+    <span class="tp-checkbox"></span>
+    <span class="tp-title" id="tpTitle">Task</span>
+    <div class="tp-icons">
+      <button class="floater-icon-btn" onclick="openTaskDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg></button>
+      <button class="floater-icon-btn"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></button>
+      <button class="floater-icon-btn close" onclick="closeTaskPopup()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+  </div>
+  <div class="tp-row">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>
+    <span class="tp-dot" id="tpDot"></span>
+    <span id="tpProject"></span>
+  </div>
+  <div class="tp-row">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7h.01M7 3h5l9 9-9 9-9-9V3z"/></svg>
+    <span class="tp-placeholder">Add tags</span>
+  </div>
+  <div class="tp-row">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>
+    <span id="tpDate"></span>
+  </div>
+  <div class="tp-foot">
+    <button class="floater-save" onclick="closeTaskPopup()">Save</button>
+  </div>
+</div>
+
+<div class="task-drawer" id="taskDrawer">
+  <div class="td-head">
+    <span class="td-swatch" id="tdSwatch"></span>
+    <span class="td-proj" id="tdProjHeader">Project</span>
+    <div class="td-icons">
+      <button class="floater-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></button>
+      <button class="floater-icon-btn"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></button>
+      <button class="floater-icon-btn close" onclick="closeTaskDrawer()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
+  </div>
+  <div class="td-body">
+    <div class="td-title-row">
+      <span class="td-title" id="tdTitle">Task</span>
+      <button class="td-play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>
+    </div>
+    <div class="td-desc-placeholder">Add task description</div>
+
+    <div class="td-field">
+      <span class="td-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/></svg>Project</span>
+      <span class="td-value" id="tdProject"><span class="td-lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></span></span>
+    </div>
+    <div class="td-field">
+      <span class="td-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>From - To</span>
+      <span class="td-value" id="tdDate"></span>
+    </div>
+    <div class="td-field">
+      <span class="td-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>Estimate</span>
+      <span class="td-value" id="tdEstimate"></span>
+    </div>
+    <div class="td-field">
+      <span class="td-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19h4v-6H4v6zM10 19h4V9h-4v10zM16 19h4V4h-4v15z"/></svg>Priority</span>
+      <span class="td-value" id="tdPriority"></span>
+    </div>
+    <div class="td-field">
+      <span class="td-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7h.01M7 3h5l9 9-9 9-9-9V3z"/></svg>Tags</span>
+      <span class="td-value empty">Empty</span>
+    </div>
+    <div class="td-field">
+      <span class="td-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg>Assignee</span>
+      <span class="td-value"><span class="td-avatar">SY</span> Shelley Yoo</span>
+    </div>
+    <div class="td-field">
+      <span class="td-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9 12l2 2 4-4"/></svg>Status</span>
+      <span class="td-value">Todo</span>
+    </div>
+    <div class="td-field">
+      <span class="td-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 2l4 4-4 4M3 11V9a4 4 0 014-4h14M7 22l-4-4 4-4M21 13v2a4 4 0 01-4 4H3"/></svg>Repeat</span>
+      <span class="td-value empty">Empty</span>
+    </div>
+    <div class="td-field">
+      <span class="td-label"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>Billable</span>
+      <span class="td-value"><span class="td-star"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7-6.2-3.8L6 21l1.6-7L2.2 9.2l7.1-.6z"/></svg></span><span class="td-toggle"></span></span>
+    </div>
+
+    <div class="td-section">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      Subtasks
+    </div>
+    <div class="td-section">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 15l6-6 6 6"/></svg>
+      Time
+      <span class="td-view" id="tdTimeView">0 View entries →</span>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast">
   <div class="tick"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div>
   <span id="toastText">Time logged</span>
@@ -814,6 +993,18 @@ function addBlock(colId, top, height, cls, title, sub, meta){
   return b;
 }
 
+function addCalendarBlock(colId, top, height, title, meta){
+  const col = document.getElementById(colId);
+  const b = document.createElement('div');
+  b.className = 'block cal-event';
+  b.style.top = top+'px';
+  b.style.height = Math.max(height,26)+'px';
+  b.innerHTML = title + '<span class="g-badge">G</span>';
+  b.onclick = (e)=>{ e.stopPropagation(); openFloater(b, meta); };
+  col.appendChild(b);
+  return b;
+}
+
 buildHours();
 ['col-mon','col-tue','col-wed','col-thu','col-fri'].forEach(buildDayCells);
 
@@ -831,60 +1022,132 @@ addBlock('col-thu', timeToTop(9,0), 56, 'admin', 'Emails & Slack', 'Admin & Comm
 addBlock('col-thu', timeToTop(11,0), 30, 'admin', 'Weekly sync', 'Admin & Comms',
   {type:'LOGGED', title:'Weekly sync', task:'Weekly sync', project:'Admin & Comms', color:'--c-admin', date:'Thu, Jul 9', time:'11:00 AM → 11:30 AM', duration:'30m'});
 
+// Google Calendar events — two back-to-back calls, a real contextual signal leading into the gap
+addCalendarBlock('col-thu', timeToTop(13,30), 28, 'Shelley / Arushi',
+  {type:'CALENDAR', title:'Shelley / Arushi', date:'Thu, Jul 9', time:'1:30 PM → 2:00 PM', duration:'30m'});
+addCalendarBlock('col-thu', timeToTop(14,0), 28, 'Design sync',
+  {type:'CALENDAR', title:'Design sync', date:'Thu, Jul 9', time:'2:00 PM → 2:30 PM', duration:'30m'});
+
 // (Kimchi Digital's planned-but-unlogged item lives in the all-day strip above, matching the real product's pattern)
 
-// The unplanned gap — flagged
-const gapTop = timeToTop(14,0);
-const gapHeight = 84; // 1.5h
-const gapMarker = document.createElement('div');
-gapMarker.className = 'gap-marker';
-gapMarker.style.top = gapTop+'px';
-gapMarker.style.height = gapHeight+'px';
-gapMarker.id = 'gapMarker';
-gapMarker.innerHTML = '<span class="dot"></span><span class="gm-label">Possible missing time</span>';
-gapMarker.onclick = (e)=>{ e.stopPropagation(); openPanel(); };
-document.getElementById('col-thu').appendChild(gapMarker);
+// Friday context — a couple of other meetings, then a wide-open stretch of the day
+addBlock('col-fri', timeToTop(9,0), 30, 'admin', 'Standup', 'Admin & Comms',
+  {type:'LOGGED', title:'Standup', task:'Standup', project:'Admin & Comms', color:'--c-admin', date:'Fri, Jul 10', time:'9:00 AM → 9:30 AM', duration:'30m'});
+addBlock('col-fri', timeToTop(12,0), 30, 'internal', 'Client check-in', 'Kimchi Digital',
+  {type:'LOGGED', title:'Client check-in', task:'Client check-in', project:'Kimchi Digital', color:'--c-internal', date:'Fri, Jul 10', time:'12:00 PM → 12:30 PM', duration:'30m'});
+// (Content editing is planned for today with a 3h estimate — see the chip above — but never got a time slot)
 
-// Friday context
-addBlock('col-fri', timeToTop(15,0), 56, 'new', 'Content editing', 'Blog · UStudio · 1h',
-  {type:'LOGGED', title:'Content editing', task:'Content editing', project:'UStudio', color:'--c-new', date:'Fri, Jul 10', time:'3:00 PM → 4:00 PM', duration:'1h'});
-addBlock('col-fri', timeToTop(16,0), 56, 'focus', 'Focus time', 'No project · 1h',
-  {type:'LOGGED', title:'Focus time', task:'Focus time', project:'No project', color:'--c-focus', date:'Fri, Jul 10', time:'4:00 PM → 5:00 PM', duration:'1h'});
-
-// Wire up click handlers on the static all-day chips
-function wireChip(chip, meta){
-  chip.onclick = (e)=>{ e.stopPropagation(); openFloater(chip, meta); };
+// GAP MARKERS — colored to match each gap's top-suggested project (light = not yet logged)
+const RGB_MAP = { '--c-internal':'194,24,91', '--c-new':'217,131,36', '--c-test':'138,75,18', '--c-admin':'61,107,79', '--c-focus':'91,79,196' };
+function styleGapMarker(el, colorVar){
+  el.style.setProperty('--mc', 'var('+colorVar+')');
+  el.style.setProperty('--mc-bg', 'var('+colorVar+'-bg)');
+  el.style.setProperty('--mc-rgb', RGB_MAP[colorVar] || '194,24,91');
 }
-document.querySelectorAll('.allday-cell .chip').forEach(chip=>{
-  const b = chip.querySelector('b');
-  const title = b ? b.textContent.trim() : chip.textContent.trim();
-  const sub = chip.querySelector('.sub') ? chip.querySelector('.sub').textContent : '';
-  const isPlanned = chip.dataset.type === 'planned';
-  let color = '--c-admin';
-  if(chip.classList.contains('internal')) color = '--c-internal';
-  if(chip.classList.contains('new')) color = '--c-new';
-  if(chip.classList.contains('focus')) color = '--c-focus';
-  wireChip(chip, {
-    type: isPlanned ? 'PLANNED' : 'LOGGED',
-    title: title, task: title,
-    project: sub.split('·').pop().trim(),
-    color: color,
-    date: 'Thu, Jul 9',
-    time: isPlanned ? 'No specific time yet' : '',
-    duration: isPlanned ? '' : ''
-  });
-});
+function createGapMarker(gapId, colId, top, height, colorVar){
+  const marker = document.createElement('div');
+  marker.className = 'gap-marker';
+  marker.style.top = top+'px';
+  marker.style.height = height+'px';
+  marker.dataset.gapId = gapId;
+  styleGapMarker(marker, colorVar);
+  marker.innerHTML = '<span class="dot"></span><span class="gm-label">Possible missing time</span>';
+  marker.onclick = (e)=>{ e.stopPropagation(); openPanel(gapId); };
+  document.getElementById(colId).appendChild(marker);
+  return marker;
+}
 
-let recovered = false;
+// Gap configs — each gap has its own suggestion, default range, and note text
+const GAP_CONFIGS = {
+  'thu-gap': {
+    colId:'col-thu', markerTop:timeToTop(14,30), markerHeight:42, colorVar:'--c-internal',
+    fromLabel:'2:30 PM', toLabel:'3:15 PM', defaultTask:'revise', defaultProject:'kimchi',
+    note:"Thursday 2:30 PM – 3:15 PM doesn't have a timer or a plan. Here's what it might have been — edit anything that's off."
+  },
+  'fri-gap': {
+    colId:'col-fri', markerTop:timeToTop(13,0), markerHeight:224, colorVar:'--c-new',
+    fromLabel:'1:00 PM', toLabel:'4:00 PM', defaultTask:'content', defaultProject:'ustudio',
+    note:"Friday 1:00 PM – 5:00 PM has no timer or plan. Content editing is estimated at 3h and hasn't been logged yet — here's a starting point; the rest of the window is still open if this doesn't cover it all."
+  }
+};
+createGapMarker('thu-gap', 'col-thu', GAP_CONFIGS['thu-gap'].markerTop, GAP_CONFIGS['thu-gap'].markerHeight, GAP_CONFIGS['thu-gap'].colorVar);
+createGapMarker('fri-gap', 'col-fri', GAP_CONFIGS['fri-gap'].markerTop, GAP_CONFIGS['fri-gap'].markerHeight, GAP_CONFIGS['fri-gap'].colorVar);
+
+// TASK POPUP / DRAWER — clicking a task chip opens a compact popup;
+// the expand icon inside it opens the full task drawer (Project, Estimate, Priority, etc.)
+const TASK_DETAILS = {
+  clientcall: { title:'Client call',           project:'Kimchi Digital', color:'--c-internal', date:'Jul 7',  estimate:'–', priority:'Empty', entries:1 },
+  revise:     { title:'Revise homepage copy',  project:'Kimchi Digital', color:'--c-internal', date:'Jul 9',  estimate:'–', priority:'Empty', entries:0 },
+  content:    { title:'Content editing',       project:'UStudio',        color:'--c-new',      date:'Jul 10', estimate:'3h', priority:'High',  entries:0 },
+  focustime:  { title:'Focus time',            project:'No project',     color:'--c-focus',    date:'Jul 10', estimate:'–', priority:'Empty', entries:0 }
+};
+let currentTaskKey = null;
+
+function openTaskPopup(anchorEl, taskKey){
+  closeFloater(); closeTaskDrawer(); cancelCreate(); dismissIntro();
+  currentTaskKey = taskKey;
+  const t = TASK_DETAILS[taskKey];
+  document.getElementById('tpTitle').textContent = t.title;
+  document.getElementById('tpDot').style.background = 'var('+t.color+')';
+  document.getElementById('tpProject').textContent = t.project;
+  document.getElementById('tpProject').style.color = 'var('+t.color+')';
+  document.getElementById('tpDate').textContent = t.date;
+  const p = document.getElementById('taskPopup');
+  const rect = anchorEl.getBoundingClientRect();
+  const w = 300;
+  let left = rect.right + 10;
+  if(left + w > window.innerWidth - 12){ left = rect.left - w - 10; }
+  if(left < 12){ left = Math.min(rect.left, window.innerWidth - w - 12); }
+  let top = rect.top;
+  if(top + 210 > window.innerHeight - 12){ top = window.innerHeight - 222; }
+  p.style.left = left + 'px';
+  p.style.top = top + 'px';
+  p.classList.add('show');
+}
+function closeTaskPopup(){
+  document.getElementById('taskPopup').classList.remove('show');
+}
+function openTaskDrawer(){
+  if(!currentTaskKey) return;
+  closeTaskPopup();
+  const t = TASK_DETAILS[currentTaskKey];
+  document.getElementById('tdSwatch').style.background = 'var('+t.color+')';
+  document.getElementById('tdProjHeader').textContent = t.project;
+  document.getElementById('tdTitle').textContent = t.title;
+  document.getElementById('tdProject').innerHTML =
+    '<span class="td-lock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg></span> '+t.project;
+  document.getElementById('tdDate').textContent = t.date;
+  document.getElementById('tdEstimate').innerHTML = t.estimate === '–'
+    ? '<span class="td-value empty" style="padding:0">–</span>'
+    : t.estimate+' <span style="color:var(--text-faint);font-weight:400;margin-left:6px">total</span>';
+  document.getElementById('tdPriority').textContent = t.priority;
+  document.getElementById('tdPriority').className = t.priority === 'Empty' ? 'td-value empty' : 'td-value';
+  document.getElementById('tdTimeView').textContent = t.entries+' View entries →';
+  document.getElementById('taskDrawer').classList.add('open');
+}
+function closeTaskDrawer(){
+  document.getElementById('taskDrawer').classList.remove('open');
+}
+document.querySelectorAll('.chip[data-task]').forEach(chip=>{
+  chip.onclick = (e)=>{ e.stopPropagation(); openTaskPopup(chip, chip.dataset.task); };
+});
+document.addEventListener('click', (e)=>{
+  const tp = document.getElementById('taskPopup');
+  if(tp.classList.contains('show') && !tp.contains(e.target) && !e.target.closest('.chip[data-task]')){ closeTaskPopup(); }
+  const td = document.getElementById('taskDrawer');
+  if(td.classList.contains('open') && !td.contains(e.target) && !e.target.closest('.chip[data-task]') && !e.target.closest('.tp-icons')){ closeTaskDrawer(); }
+});
 
 // Task options — each has a default project, but project is independently changeable
 const TASK_OPTIONS = {
   prep:    { label:'Prep interview questions', project:'northwind',
-             why:'This task is due today, estimated at 1.5h, and has no time logged yet.' },
+             why:'This task is due today, estimated at 45m, and has no time logged yet.' },
   content: { label:'Content editing',           project:'ustudio',
-             why:'This task is due today with no time logged yet.' },
+             why:'This task is due today, estimated at 3h, and has no time logged yet.' },
   revise:  { label:'Revise homepage copy',       project:'kimchi',
-             why:'This is already planned for later today — selecting it will log the time directly.' },
+             why:"Kimchi Digital is a project you already have planned work for today — this gap likely belongs to it, even though that work hasn't been scheduled to a specific time." },
+  calendar:{ label:'Shelley / Arushi',           project:'admin',
+             why:'Two calendar events ran back-to-back right before this gap — the call may have run long.' },
   custom:  { label:'',                           project:'none',
              why:"You're adding this manually — nothing was suggested for this option." }
 };
@@ -903,6 +1166,8 @@ function updatePillColors(){
     const el = document.getElementById(id);
     el.style.background = 'var('+proj.color+'-bg)';
     el.style.color = 'var('+proj.color+')';
+    const icon = el.parentElement.querySelector('.pill-icon');
+    if(icon) icon.style.color = 'var('+proj.color+')';
   });
 }
 function onTaskPickerChange(){
@@ -956,11 +1221,23 @@ setTimeout(()=>{
   if(to) to.addEventListener('input', recalcDuration);
 }, 0);
 
-function openPanel(){
-  if(recovered) return;
+let currentGapId = null;
+const resolvedGaps = {};
+
+function openPanel(gapId){
+  if(resolvedGaps[gapId]) return;
+  const cfg = GAP_CONFIGS[gapId];
+  currentGapId = gapId;
   closeFloater();
+  cancelCreate();
   dismissIntro();
-  document.getElementById('overlay').classList.add('open');
+  document.getElementById('panelNote').textContent = cfg.note;
+  document.getElementById('fromTime').value = cfg.fromLabel;
+  document.getElementById('toTime').value = cfg.toLabel;
+  document.getElementById('taskPicker').value = cfg.defaultTask;
+  document.getElementById('projectPicker').value = cfg.defaultProject;
+  onTaskPickerChange();
+  recalcDuration();
   document.getElementById('panel').classList.add('open');
 }
 function dismissIntro(){
@@ -968,9 +1245,14 @@ function dismissIntro(){
 }
 setTimeout(()=>{ document.getElementById('introBanner').classList.add('show'); }, 500);
 function closePanel(){
-  document.getElementById('overlay').classList.remove('open');
   document.getElementById('panel').classList.remove('open');
 }
+document.addEventListener('click', (e)=>{
+  const p = document.getElementById('panel');
+  if(p.classList.contains('open') && !p.contains(e.target) && !e.target.closest('.gap-marker')){
+    closePanel();
+  }
+});
 function showToast(text){
   const t = document.getElementById('toast');
   document.getElementById('toastText').textContent = text;
@@ -981,21 +1263,31 @@ function showToast(text){
 // FLOATER — read-only info card for existing blocks/chips
 function openFloater(anchorEl, meta){
   const f = document.getElementById('floater');
-  document.getElementById('floaterType').textContent = meta.type;
+  const isCalendar = meta.type === 'CALENDAR';
+  document.getElementById('floaterCalIcon').style.display = isCalendar ? '' : 'none';
+  document.getElementById('floaterType').textContent = isCalendar ? 'Calendar event' : meta.type;
   document.getElementById('floaterTitle').textContent = meta.title;
-  document.getElementById('floaterPills').innerHTML =
-    '<span class="floater-pill" style="background:var('+meta.color+'-bg,#f1f0f4);color:var('+meta.color+')">'+meta.task+'</span>' +
-    '<span class="floater-pill" style="background:var('+meta.color+'-bg,#f1f0f4);color:var('+meta.color+')">'+meta.project+'</span>' +
-    '<span class="floater-pill tags">Tags</span>';
+  if(isCalendar){
+    document.getElementById('floaterPills').innerHTML =
+      '<button class="floater-joinmeeting"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg> Join meeting</button>';
+    f.style.borderLeftColor = '#c98b85';
+  } else {
+    document.getElementById('floaterPills').innerHTML =
+      '<span class="floater-pill" style="background:var('+meta.color+'-bg,#f1f0f4);color:var('+meta.color+')">'+meta.task+'</span>' +
+      '<span class="floater-pill" style="background:var('+meta.color+'-bg,#f1f0f4);color:var('+meta.color+')">'+meta.project+'</span>' +
+      '<span class="floater-pill tags">Tags</span>';
+    f.style.borderLeftColor = 'var('+meta.color+')';
+  }
   document.getElementById('floaterDate').textContent = meta.date;
   document.getElementById('floaterTime').textContent = meta.time || '';
   document.getElementById('floaterDuration').textContent = meta.duration || '';
-  f.style.borderLeftColor = 'var('+meta.color+')';
   // LOGGED entries show a billable indicator and only a Save button.
   // PLANNED entries show both "Log time" (convert to a real entry) and "Save" (edit the plan).
+  // CALENDAR entries show only "Log time" — there's nothing to Save yet.
   const isLogged = meta.type === 'LOGGED';
   document.getElementById('floaterBillable').style.display = isLogged ? '' : 'none';
   document.getElementById('floaterLogTimeBtn').style.display = isLogged ? 'none' : '';
+  document.getElementById('floaterSaveBtn').style.display = isCalendar ? 'none' : '';
   const rect = anchorEl.getBoundingClientRect();
   const floaterWidth = 300;
   let left = rect.right + 10;
@@ -1016,6 +1308,7 @@ document.addEventListener('click', (e)=>{
 });
 
 function acceptGap(){
+  const cfg = GAP_CONFIGS[currentGapId];
   const projKey = document.getElementById('projectPicker').value;
   const proj = PROJECT_OPTIONS[projKey];
   const desc = document.getElementById('descInput').value || 'Logged time';
@@ -1023,23 +1316,23 @@ function acceptGap(){
   const to = document.getElementById('toTime').value;
   const fromHM = parseClock(from);
   const mins = recalcDuration();
-  const marker = document.getElementById('gapMarker');
+  const marker = document.querySelector('[data-gap-id="'+currentGapId+'"]');
   // Use the edited time range for position/height when valid; fall back to the original gap slot otherwise
   const top = fromHM ? timeToTop(fromHM.h, fromHM.m) : parseFloat(marker.style.top);
   const height = mins ? (mins/60)*pxPerHour : parseFloat(marker.style.height);
-  const durationLabel = mins ? formatDuration(mins) : '1h 30m';
+  const durationLabel = mins ? formatDuration(mins) : '45m';
   marker.remove();
-  addBlock('col-thu', top, height, proj.cls, desc, proj.label+' · '+from+' – '+to,
-    {type:'LOGGED', title:desc, task:desc, project:proj.label, color:proj.color, date:'Thu, Jul 9', time:from+' → '+to, duration:durationLabel});
+  addBlock(cfg.colId, top, height, proj.cls, desc, proj.label+' · '+from+' – '+to,
+    {type:'LOGGED', title:desc, task:desc, project:proj.label, color:proj.color, date:DAY_INFO[cfg.colId].label, time:from+' → '+to, duration:durationLabel});
   closePanel();
-  recovered = true;
+  resolvedGaps[currentGapId] = true;
   showToast('Time logged — '+durationLabel);
 }
 function dismissGap(){
-  const marker = document.getElementById('gapMarker');
+  const marker = document.querySelector('[data-gap-id="'+currentGapId+'"]');
   marker.remove();
   closePanel();
-  recovered = true;
+  resolvedGaps[currentGapId] = true;
   showToast('Deleted');
 }
 
