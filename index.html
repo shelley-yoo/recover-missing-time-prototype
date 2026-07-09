@@ -6,10 +6,12 @@
 <title>Toggl Focus — Recover Missing Time</title>
 <style>
   :root{
-    --sidebar-bg: #1a1625;
-    --sidebar-text: #a8a2b8;
-    --sidebar-text-active: #ffffff;
-    --sidebar-highlight: #2d2640;
+    --rail-bg: #f3f2f6;
+    --sidebar-bg: #ffffff;
+    --sidebar-text: #5c5867;
+    --sidebar-text-active: #c2185b;
+    --sidebar-highlight: #fbe4ee;
+    --sidebar-border: #eeecf1;
     --accent-purple: #7c3aed;
     --accent-pink: #d81b6a;
     --bg: #ffffff;
@@ -43,28 +45,66 @@
   }
   .app{ display:flex; height:100vh; min-height:600px; overflow:hidden; }
 
-  /* SIDEBAR */
-  .sidebar{
-    width:210px; flex-shrink:0; background:var(--sidebar-bg);
-    display:flex; flex-direction:column; padding:16px 12px;
+  /* ICON RAIL — thin far-left strip, separate from the main nav panel */
+  .icon-rail{
+    width:44px; flex-shrink:0; background:var(--rail-bg);
+    display:flex; flex-direction:column; align-items:center; padding:14px 0;
+    border-right:1px solid var(--sidebar-border);
   }
-  .org{ display:flex; align-items:center; gap:8px; padding:4px 6px 18px 6px; }
-  .org-avatar{
-    width:26px; height:26px; border-radius:50%;
+  .rail-org{
+    width:28px; height:28px; border-radius:50%;
     background: radial-gradient(circle at 30% 30%, var(--accent-pink), var(--accent-purple));
-    flex-shrink:0;
+    display:flex; align-items:center; justify-content:center; color:#fff; flex-shrink:0;
   }
-  .org-name{ color:var(--sidebar-text-active); font-size:13px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .nav-label{ color:#655d78; font-size:10.5px; font-weight:700; letter-spacing:.06em; margin:14px 8px 6px; }
+  .rail-org svg{ width:13px; height:13px; }
+  .rail-version{ font-size:9px; color:var(--text-faint); margin-top:2px; font-weight:600; }
+  .rail-icon{
+    width:30px; height:30px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+    color:var(--text-faint); margin-top:14px; flex-shrink:0;
+  }
+  .rail-icon svg{ width:16px; height:16px; }
+  .rail-spacer{ flex:1; }
+  .rail-avatar{
+    width:24px; height:24px; border-radius:50%; background:var(--c-internal);
+    color:#fff; font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center;
+    margin-bottom:8px; flex-shrink:0;
+  }
+  .rail-trial{
+    font-size:9px; font-weight:700; color:#fff; background:var(--accent-purple);
+    border-radius:5px; padding:2px 5px; margin-bottom:12px; writing-mode:vertical-rl;
+  }
+
+  /* SIDEBAR — main nav panel */
+  .sidebar{
+    width:200px; flex-shrink:0; background:var(--sidebar-bg);
+    display:flex; flex-direction:column; padding:16px 12px;
+    border-right:1px solid var(--sidebar-border);
+  }
+  .org{ display:flex; align-items:center; gap:4px; padding:4px 4px 18px; cursor:default; }
+  .org-name{ color:var(--text); font-size:13px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .org-chevron{ color:var(--text-faint); flex-shrink:0; }
+  .org-chevron svg{ width:12px; height:12px; }
+  .nav-label{ color:var(--text-faint); font-size:10.5px; font-weight:700; letter-spacing:.06em; margin:14px 8px 6px; }
   .nav-item{
     display:flex; align-items:center; gap:10px; color:var(--sidebar-text);
     padding:7px 8px; border-radius:7px; font-size:13.5px; cursor:default; margin-bottom:1px;
   }
-  .nav-item svg{ width:15px; height:15px; flex-shrink:0; opacity:.85; }
-  .nav-item.active{ background:var(--sidebar-highlight); color:var(--sidebar-text-active); }
-  .nav-item.active svg{ opacity:1; }
+  .nav-item svg{ width:15px; height:15px; flex-shrink:0; opacity:.8; }
+  .nav-item .star{ margin-left:auto; color:#f0a83c; }
+  .nav-item .star svg{ width:13px; height:13px; opacity:1; }
+  .nav-item.active{ background:var(--sidebar-highlight); color:var(--sidebar-text-active); font-weight:600; }
+  .nav-item.active svg{ opacity:1; color:var(--sidebar-text-active); }
+  .nav-item .badge-pro{
+    margin-left:auto; font-size:9px; font-weight:700; color:#7c3aed; background:#ede9fe;
+    padding:2px 5px; border-radius:4px;
+  }
   .sidebar-spacer{ flex:1; }
-  .sidebar-foot{ color:#5c5470; font-size:11.5px; padding:6px 8px; }
+  .sidebar-foot-item{
+    display:flex; align-items:center; gap:9px; color:var(--sidebar-text); font-size:12.5px;
+    padding:6px 8px; cursor:default;
+  }
+  .sidebar-foot-item svg{ width:14px; height:14px; opacity:.7; flex-shrink:0; }
+  .sidebar-foot-item.upgrade{ color:var(--accent-purple); font-weight:600; }
 
   /* MAIN */
   .main{ flex:1; display:flex; flex-direction:column; min-width:0; background:var(--bg); }
@@ -121,6 +161,10 @@
   }
   .day-head.today{ color:var(--accent-purple); }
   .day-head .dnum{ font-size:17px; font-weight:600; }
+  .day-head.today .dnum{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:26px; height:26px; border-radius:50%; background:var(--accent-purple); color:#fff;
+  }
   .day-head .dname{ font-size:11px; color:var(--text-faint); text-transform:uppercase; letter-spacing:.03em; }
   .corner{ border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--bg); z-index:5; }
 
@@ -164,25 +208,25 @@
 
   .chip.planned-chip{ border:1.5px dashed currentColor; background:transparent; }
 
-  /* GAP MARKER */
+  /* GAP MARKER — tinted with the top-suggested project's colour (light = not yet logged) */
   .gap-marker{
     position:absolute; left:3px; right:3px; border-radius:6px;
-    border:1.5px dashed var(--gap-glow); background:rgba(234,179,8,.09);
+    border:1.5px dashed var(--c-test); background:var(--c-test-bg);
     z-index:1; cursor:pointer; display:flex; align-items:center; justify-content:center;
     transition: background .15s ease, box-shadow .15s ease;
   }
-  .gap-marker:hover{ background:rgba(234,179,8,.18); box-shadow:0 0 0 3px rgba(234,179,8,.12); }
+  .gap-marker:hover{ box-shadow:0 0 0 3px rgba(138,75,18,.15); }
   .gap-marker .dot{
-    width:8px; height:8px; border-radius:50%; background:var(--gap-glow);
-    box-shadow:0 0 0 4px rgba(234,179,8,.25);
+    width:8px; height:8px; border-radius:50%; background:var(--c-test);
+    box-shadow:0 0 0 4px rgba(138,75,18,.25);
     animation: pulse 2.2s ease-in-out infinite;
   }
   .gap-marker .gm-label{
-    font-size:10.5px; font-weight:600; color:#92660a; margin-left:6px; white-space:nowrap;
+    font-size:10.5px; font-weight:600; color:var(--c-test); margin-left:6px; white-space:nowrap;
   }
   @keyframes pulse{
-    0%,100%{ box-shadow:0 0 0 4px rgba(234,179,8,.25); }
-    50%{ box-shadow:0 0 0 7px rgba(234,179,8,.12); }
+    0%,100%{ box-shadow:0 0 0 4px rgba(138,75,18,.25); }
+    50%{ box-shadow:0 0 0 7px rgba(138,75,18,.12); }
   }
   .gap-marker.dismissed{
     border-color:#d8d5df; background:#f5f4f7; cursor:default;
@@ -246,15 +290,13 @@
     font-size:10.5px; font-weight:700; text-transform:uppercase; letter-spacing:.05em;
     color:var(--text-faint); margin-bottom:8px;
   }
-  .suggestion-task{ display:flex; align-items:center; gap:10px; }
-  .suggestion-task .badge{
-    width:30px; height:30px; border-radius:7px; background:var(--c-new-bg); color:var(--c-new);
-    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  .pill-row{ display:flex; gap:6px; flex-wrap:wrap; align-items:center; }
+  .pill-select{
+    border:none; border-radius:7px; padding:6px 10px; font-size:12px; font-weight:600;
+    font-family:inherit; cursor:pointer; background:var(--c-test-bg); color:var(--c-test);
+    -webkit-appearance:none; appearance:none;
   }
-  .suggestion-task .badge svg{ width:15px; height:15px; }
-  .suggestion-task .tinfo{ min-width:0; }
-  .suggestion-task .ttitle{ font-size:13.5px; font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .suggestion-task .tmeta{ font-size:11.5px; color:var(--text-muted); margin-top:1px; }
+  .pill-select:focus{ outline:2px solid var(--accent-purple); outline-offset:1px; }
   .suggestion-why{ font-size:11.5px; color:var(--text-faint); margin-top:10px; line-height:1.5; }
 
   .desc-input{
@@ -289,7 +331,7 @@
   .toast .tick svg{ width:9px; height:9px; }
 
   .reset-btn{
-    position:fixed; top:16px; right:20px; z-index:15;
+    position:fixed; bottom:16px; left:16px; z-index:15;
     background:#fff; border:1px solid var(--border); border-radius:7px; padding:7px 12px;
     font-size:11.5px; color:var(--text-muted); cursor:pointer; font-family:inherit;
     box-shadow:0 2px 6px rgba(0,0,0,.06);
@@ -315,28 +357,108 @@
   /* FLOATER — read-only info card for existing blocks/chips */
   .block, .chip{ cursor:pointer; }
   .floater{
-    position:fixed; width:250px; background:#fff; border-radius:10px;
+    position:fixed; width:300px; background:#fff; border-radius:10px;
     box-shadow:0 12px 32px rgba(20,16,30,.18), 0 0 0 1px var(--border);
     z-index:22; opacity:0; transform:translateY(4px) scale(.98); pointer-events:none;
     transition:opacity .12s ease, transform .12s ease;
+    border-left:3px solid var(--c-new); overflow:hidden;
   }
   .floater.show{ opacity:1; transform:translateY(0) scale(1); pointer-events:auto; }
-  .floater-head{ display:flex; align-items:center; gap:8px; padding:11px 12px 8px; }
-  .floater-swatch{ width:9px; height:9px; border-radius:3px; flex-shrink:0; }
-  .floater-type{ font-size:10px; font-weight:700; letter-spacing:.05em; color:var(--text-faint); flex:1; }
-  .floater-close{
-    border:none; background:none; color:var(--text-faint); cursor:pointer; font-size:13px;
-    width:20px; height:20px; border-radius:5px; flex-shrink:0;
+  .floater-head{ display:flex; align-items:center; gap:8px; padding:11px 10px 8px 14px; }
+  .floater-type{ font-size:10.5px; font-weight:700; letter-spacing:.05em; color:var(--text-faint); flex:1; }
+  .floater-icons{ display:flex; align-items:center; gap:3px; }
+  .floater-icon-btn{
+    width:22px; height:22px; border-radius:6px; border:none; background:none;
+    color:var(--text-faint); display:flex; align-items:center; justify-content:center; cursor:default;
   }
-  .floater-close:hover{ background:var(--bg-soft); }
-  .floater-title{ font-size:14px; font-weight:600; padding:0 12px 10px; }
-  .floater-pills{ display:flex; gap:6px; padding:0 12px 10px; flex-wrap:wrap; }
-  .floater-pill{ font-size:11px; font-weight:500; padding:4px 8px; border-radius:6px; white-space:nowrap; }
-  .floater-meta{
-    display:flex; align-items:center; gap:6px; padding:9px 12px; border-top:1px solid #f1f0f4;
-    font-size:11.5px; color:var(--text-muted);
+  .floater-icon-btn svg{ width:13px; height:13px; }
+  .floater-icon-btn.play{ background:var(--accent-purple); color:#fff; border-radius:50%; }
+  .floater-icon-btn.close{ cursor:pointer; }
+  .floater-icon-btn.close:hover{ background:var(--bg-soft); }
+  .floater-title{ font-size:15px; font-weight:600; padding:2px 14px 10px; }
+  .floater-pills{ display:flex; gap:6px; padding:0 14px 12px; flex-wrap:wrap; }
+  .floater-pill{ font-size:11px; font-weight:500; padding:5px 9px; border-radius:6px; white-space:nowrap; }
+  .floater-pill.tags{ color:var(--text-faint); border:1px solid var(--border); background:none; }
+  .floater-date-row{
+    display:flex; align-items:center; gap:8px; padding:11px 14px; border-top:1px solid #f1f0f4;
+    font-size:12px; color:var(--text);
   }
-  .floater-meta svg{ width:13px; height:13px; opacity:.7; flex-shrink:0; }
+  .floater-date-row .fdate{
+    display:flex; align-items:center; gap:5px; color:var(--text-muted); flex-shrink:0;
+  }
+  .floater-date-row .fdate svg{ width:13px; height:13px; opacity:.7; }
+  .floater-date-row .ftime{ flex:1; display:flex; align-items:center; gap:5px; justify-content:center; color:var(--text-muted); font-size:11.5px; }
+  .floater-date-row .fdur{ display:flex; align-items:center; gap:4px; color:var(--text-muted); font-size:11.5px; flex-shrink:0; }
+  .floater-date-row .fdur svg{ width:12px; height:12px; opacity:.7; }
+  .floater-foot{ padding:10px 14px 14px; display:flex; justify-content:flex-end; gap:8px; }
+  .floater-save{
+    border:none; border-radius:7px; padding:7px 16px; font-size:12.5px; font-weight:600;
+    background:var(--accent-purple); color:#fff; cursor:pointer; font-family:inherit;
+  }
+  .floater-save:hover{ background:#6b2fd6; }
+  .floater-logtime{
+    border:1px solid var(--border); border-radius:7px; padding:7px 16px; font-size:12.5px; font-weight:600;
+    background:#fff; color:var(--text); cursor:pointer; font-family:inherit;
+  }
+  .floater-logtime:hover{ background:var(--bg-soft); }
+  .floater-billable{ padding:0 14px 12px; }
+  .floater-billable span{
+    display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px;
+    border:1px dashed var(--border); border-radius:7px; color:var(--text-faint); font-size:12px;
+  }
+
+  /* SELECTION BLOCK — shown while creating a new past entry */
+  .selection-block{
+    position:absolute; left:3px; right:3px; border-radius:6px;
+    background:#e6e5ea; border:2px solid var(--accent-pink); z-index:3;
+  }
+
+  /* CREATE FLOATER — "LOG TIME" card matching manual backfill flow */
+  .create-floater{ border-left:3px solid var(--border); width:290px; }
+  .cf-head{ display:flex; align-items:center; padding:14px 14px 4px; }
+  .cf-title{
+    font-size:11px; font-weight:700; letter-spacing:.05em; color:var(--text-faint);
+    display:flex; align-items:center; gap:5px; flex:1;
+  }
+  .cf-title svg{ width:12px; height:12px; opacity:.7; }
+  .cf-desc{
+    width:100%; border:none; padding:8px 14px 10px; font-size:14px; font-family:inherit;
+    color:var(--text); background:none;
+  }
+  .cf-desc:focus{ outline:none; }
+  .cf-desc::placeholder{ color:var(--text-faint); }
+  .cf-pills{ display:flex; gap:6px; padding:0 14px 10px; flex-wrap:wrap; }
+  .cf-pill-select{
+    border:1.5px dashed var(--border); background:none; color:var(--text-faint);
+    border-radius:7px; padding:6px 10px; font-size:12px; font-weight:600; font-family:inherit; cursor:pointer;
+  }
+  .cf-pill-select.filled{ border-style:solid; border-color:transparent; }
+  .cf-pill-dollar{
+    border:1.5px dashed var(--border); background:none; color:var(--text-faint);
+    border-radius:7px; padding:6px 11px; font-size:12px; font-weight:600; cursor:default;
+  }
+  .cf-plan-row{
+    display:flex; align-items:center; gap:7px; padding:10px 14px; border-top:1px solid #f1f0f4;
+    font-size:11.5px; font-weight:700; letter-spacing:.03em; color:var(--text-faint);
+  }
+  .cf-plan-row svg{ width:14px; height:14px; opacity:.6; }
+  .cf-plan-row .cf-add{ margin-left:auto; color:var(--accent-purple); font-weight:600; cursor:default; }
+  .cf-log-row{
+    display:flex; align-items:center; gap:7px; padding:10px 14px; border-top:1px solid #f1f0f4;
+    font-size:11.5px; font-weight:700; color:var(--text-faint);
+  }
+  .cf-log-row svg{ width:14px; height:14px; opacity:.6; flex-shrink:0; }
+  .cf-log-details{ flex:1; display:flex; align-items:center; gap:8px; font-weight:500; color:var(--text); flex-wrap:wrap; }
+  .cf-log-details .cf-dur{ display:flex; align-items:center; gap:3px; color:var(--text-muted); font-weight:400; }
+  .cf-log-details .cf-dur svg{ width:11px; height:11px; opacity:.7; }
+  .cf-remove{ border:none; background:none; color:var(--text-faint); cursor:pointer; font-size:13px; padding:2px; }
+  .cf-foot{ padding:12px 14px 14px; display:flex; justify-content:flex-end; }
+  .cf-save{
+    border:none; border-radius:7px; padding:8px 16px; font-size:12.5px; font-weight:600;
+    background:#e6e4ea; color:#a49fb0; cursor:not-allowed; font-family:inherit;
+  }
+  .cf-save.active{ background:var(--accent-purple); color:#fff; cursor:pointer; }
+  .cf-save.active:hover{ background:#6b2fd6; }
 </style>
 </head>
 <body>
@@ -350,11 +472,34 @@
 </div>
 
 <div class="app">
+  <!-- ICON RAIL -->
+  <div class="icon-rail">
+    <div class="rail-org">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2v6M18.4 6.6A9 9 0 1 1 5.6 6.6"/></svg>
+    </div>
+    <div class="rail-version">2.0</div>
+    <div class="rail-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.3 3-6 7-6s7 2.7 7 6M17 11a3 3 0 100-6M23 20c0-2.7-2-5-5-5.5"/></svg>
+    </div>
+    <div class="rail-spacer"></div>
+    <div class="rail-avatar">SY</div>
+    <div class="rail-trial">29d</div>
+    <div class="rail-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+    </div>
+    <div class="rail-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+    </div>
+    <div class="rail-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.1 9a3 3 0 015.8 1c0 2-3 2-3 4M12 17h.01"/></svg>
+    </div>
+  </div>
+
   <!-- SIDEBAR -->
   <div class="sidebar">
     <div class="org">
-      <div class="org-avatar"></div>
       <div class="org-name">Shelley Yoo's organi...</div>
+      <span class="org-chevron"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9l6 6 6-6"/></svg></span>
     </div>
     <div class="nav-label">TRACK</div>
     <div class="nav-item active">
@@ -378,14 +523,35 @@
     <div class="nav-item">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M7 15l4-4 3 3 5-6"/></svg>
       Timeline
+      <span class="star"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.9 6.6 7.1.6-5.4 4.7 1.6 7-6.2-3.8L6 21l1.6-7L2.2 9.2l7.1-.6z"/></svg></span>
     </div>
     <div class="nav-label">MANAGE</div>
     <div class="nav-item">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.3 3-6 7-6s7 2.7 7 6M17 11a3 3 0 100-6M23 20c0-2.7-2-5-5-5.5"/></svg>
       Members
     </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4M21 12a9 9 0 11-6.2-8.6"/></svg>
+      Approvals
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18M8 17V9M13 17V5M18 17v-7"/></svg>
+      Time off
+      <span class="badge-pro">Pro</span>
+    </div>
     <div class="sidebar-spacer"></div>
-    <div class="sidebar-foot">29d left on trial</div>
+    <div class="sidebar-foot-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+      Download apps
+    </div>
+    <div class="sidebar-foot-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 01-4 0v-.1a1.7 1.7 0 00-1-1.6 1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.5-1H3a2 2 0 010-4h.1a1.7 1.7 0 001.5-1 1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.9.3H9a1.7 1.7 0 001-1.5V3a2 2 0 014 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9V9a1.7 1.7 0 001.5 1H21a2 2 0 010 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>
+      Settings
+    </div>
+    <div class="sidebar-foot-item upgrade">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+      Upgrade
+    </div>
   </div>
 
   <!-- MAIN -->
@@ -492,43 +658,114 @@
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h18M3 12h18M3 17h18"/></svg>
         Duration
       </div>
-      <div class="field-value">1h 30m</div>
+      <div class="field-value" id="durationDisplay">1h 30m</div>
     </div>
 
     <div class="suggestion-card">
       <div class="eyebrow">Suggested from your tasks</div>
-      <div class="suggestion-task">
-        <div class="badge">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3 8-8M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
-        </div>
-        <div class="tinfo">
-          <div class="ttitle">Prep interview questions</div>
-          <div class="tmeta">Hiring · Northwind Talent · 1.5h estimated</div>
-        </div>
+      <div class="pill-row">
+        <select id="taskPicker" class="pill-select">
+          <option value="prep" selected>Prep interview questions</option>
+          <option value="content">Content editing</option>
+          <option value="revise">Revise homepage copy</option>
+          <option value="custom">Custom entry…</option>
+        </select>
+        <select id="projectPicker" class="pill-select">
+          <option value="northwind">Northwind Talent</option>
+          <option value="ustudio">UStudio</option>
+          <option value="kimchi">Kimchi Digital</option>
+          <option value="admin">Admin & Comms</option>
+          <option value="none">No project</option>
+        </select>
+        <span class="floater-pill tags">Tags</span>
       </div>
-      <div class="suggestion-why">This task is due today, estimated at 1.5h, and has no time logged yet.</div>
+      <div class="suggestion-why" id="suggestionWhy">This task is due today, estimated at 1.5h, and has no time logged yet.</div>
     </div>
 
     <label class="desc-label">Description</label>
     <input type="text" class="desc-input" id="descInput" value="Prep interview questions">
   </div>
   <div class="panel-foot">
-    <button class="btn btn-ghost" onclick="dismissGap()">Not work time</button>
-    <button class="btn btn-primary" onclick="acceptGap()">Log this time</button>
+    <button class="btn btn-ghost" onclick="dismissGap()">Delete</button>
+    <button class="btn btn-primary" onclick="acceptGap()">Log time</button>
   </div>
 </div>
 
 <div class="floater" id="floater">
   <div class="floater-head">
-    <span class="floater-swatch" id="floaterSwatch"></span>
     <span class="floater-type" id="floaterType">LOGGED</span>
-    <button class="floater-close" onclick="closeFloater()">✕</button>
+    <div class="floater-icons">
+      <button class="floater-icon-btn play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>
+      <button class="floater-icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/></svg></button>
+      <button class="floater-icon-btn"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg></button>
+      <button class="floater-icon-btn close" onclick="closeFloater()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+    </div>
   </div>
   <div class="floater-title" id="floaterTitle">Title</div>
   <div class="floater-pills" id="floaterPills"></div>
-  <div class="floater-meta">
+  <div class="floater-billable" id="floaterBillable"><span>$</span></div>
+  <div class="floater-date-row">
+    <span class="fdate">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>
+      <span id="floaterDate"></span>
+    </span>
+    <span class="ftime" id="floaterTime"></span>
+    <span class="fdur">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+      <span id="floaterDuration"></span>
+    </span>
+  </div>
+  <div class="floater-foot">
+    <button class="floater-logtime" id="floaterLogTimeBtn" onclick="closeFloater()">Log time</button>
+    <button class="floater-save" onclick="closeFloater()">Save</button>
+  </div>
+</div>
+
+<div class="floater create-floater" id="createFloater">
+  <div class="cf-head">
+    <span class="cf-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 8v4M12 16h.01"/></svg>
+      LOG TIME
+    </span>
+    <button class="floater-icon-btn close" onclick="cancelCreate()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+  </div>
+  <input type="text" class="cf-desc" id="createDescInput" placeholder="Add description">
+  <div class="cf-pills">
+    <select id="createTaskSelect" class="cf-pill-select">
+      <option value="" disabled selected>Task</option>
+      <option value="prep">Prep interview questions</option>
+      <option value="content">Content editing</option>
+      <option value="revise">Revise homepage copy</option>
+    </select>
+    <select id="createProjectSelect" class="cf-pill-select">
+      <option value="" disabled selected>Project</option>
+      <option value="northwind">Northwind Talent</option>
+      <option value="ustudio">UStudio</option>
+      <option value="kimchi">Kimchi Digital</option>
+      <option value="admin">Admin & Comms</option>
+    </select>
+    <button class="cf-pill-dollar" disabled>$</button>
+  </div>
+  <div class="cf-plan-row">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 9h18M8 3v4M16 3v4"/></svg>
+    PLAN
+    <span class="cf-add">+ ADD</span>
+  </div>
+  <div class="cf-log-row">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
-    <span id="floaterMeta"></span>
+    LOG
+    <span class="cf-log-details">
+      <span id="createLogDate">Wed, Jul 8</span>
+      <span id="createLogTime">9:00 AM → 10:00 AM</span>
+      <span class="cf-dur">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        <span id="createLogDuration">1h</span>
+      </span>
+    </span>
+    <button class="cf-remove" onclick="cancelCreate()">✕</button>
+  </div>
+  <div class="cf-foot">
+    <button class="cf-save" id="createSaveBtn" onclick="saveCreate()">Log time</button>
   </div>
 </div>
 
@@ -558,9 +795,10 @@ function buildHours(){
 
 function buildDayCells(colId){
   const col = document.getElementById(colId);
-  HOURS.forEach(()=>{
+  HOURS.forEach(h=>{
     const c = document.createElement('div');
     c.className='hour-cell';
+    c.onclick = ()=> onCellClick(colId, h);
     col.appendChild(c);
   });
 }
@@ -639,6 +877,85 @@ document.querySelectorAll('.allday-cell .chip').forEach(chip=>{
 
 let recovered = false;
 
+// Task options — each has a default project, but project is independently changeable
+const TASK_OPTIONS = {
+  prep:    { label:'Prep interview questions', project:'northwind',
+             why:'This task is due today, estimated at 1.5h, and has no time logged yet.' },
+  content: { label:'Content editing',           project:'ustudio',
+             why:'This task is due today with no time logged yet.' },
+  revise:  { label:'Revise homepage copy',       project:'kimchi',
+             why:'This is already planned for later today — selecting it will log the time directly.' },
+  custom:  { label:'',                           project:'none',
+             why:"You're adding this manually — nothing was suggested for this option." }
+};
+const PROJECT_OPTIONS = {
+  northwind: { label:'Northwind Talent', cls:'test',     color:'--c-test' },
+  ustudio:   { label:'UStudio',          cls:'new',      color:'--c-new' },
+  kimchi:    { label:'Kimchi Digital',   cls:'internal', color:'--c-internal' },
+  admin:     { label:'Admin & Comms',    cls:'admin',    color:'--c-admin' },
+  none:      { label:'No project',       cls:'admin',    color:'--c-admin' }
+};
+
+function updatePillColors(){
+  const projKey = document.getElementById('projectPicker').value;
+  const proj = PROJECT_OPTIONS[projKey];
+  ['taskPicker','projectPicker'].forEach(id=>{
+    const el = document.getElementById(id);
+    el.style.background = 'var('+proj.color+'-bg)';
+    el.style.color = 'var('+proj.color+')';
+  });
+}
+function onTaskPickerChange(){
+  const key = document.getElementById('taskPicker').value;
+  const opt = TASK_OPTIONS[key];
+  const descInput = document.getElementById('descInput');
+  if(key === 'custom'){
+    descInput.value = '';
+    descInput.focus();
+  } else {
+    descInput.value = opt.label;
+    document.getElementById('projectPicker').value = opt.project;
+  }
+  document.getElementById('suggestionWhy').textContent = opt.why;
+  updatePillColors();
+}
+
+// Time parsing — lets the person edit From/To and see Duration update live
+function parseClock(str){
+  const m = str.trim().match(/^(\d{1,2}):(\d{2})\s*([AP]M)$/i);
+  if(!m) return null;
+  let h = parseInt(m[1],10) % 12;
+  if(m[3].toUpperCase() === 'PM') h += 12;
+  return { h, m: parseInt(m[2],10) };
+}
+function formatDuration(mins){
+  if(mins <= 0) return '--';
+  const h = Math.floor(mins/60), m = mins%60;
+  if(h === 0) return m+'m';
+  if(m === 0) return h+'h';
+  return h+'h '+m+'m';
+}
+function recalcDuration(){
+  const from = parseClock(document.getElementById('fromTime').value);
+  const to = parseClock(document.getElementById('toTime').value);
+  const el = document.getElementById('durationDisplay');
+  if(!from || !to){ el.textContent = '--'; return null; }
+  const mins = (to.h*60+to.m) - (from.h*60+from.m);
+  el.textContent = formatDuration(mins);
+  return mins > 0 ? mins : null;
+}
+setTimeout(()=>{
+  const picker = document.getElementById('taskPicker');
+  if(picker) picker.addEventListener('change', onTaskPickerChange);
+  const projPicker = document.getElementById('projectPicker');
+  if(projPicker) projPicker.addEventListener('change', updatePillColors);
+  updatePillColors();
+  const from = document.getElementById('fromTime');
+  const to = document.getElementById('toTime');
+  if(from) from.addEventListener('input', recalcDuration);
+  if(to) to.addEventListener('input', recalcDuration);
+}, 0);
+
 function openPanel(){
   if(recovered) return;
   closeFloater();
@@ -665,22 +982,27 @@ function showToast(text){
 function openFloater(anchorEl, meta){
   const f = document.getElementById('floater');
   document.getElementById('floaterType').textContent = meta.type;
-  document.getElementById('floaterSwatch').style.background = 'var('+meta.color+')';
   document.getElementById('floaterTitle').textContent = meta.title;
-  const pillsHtml = [
-    meta.task ? '<span class="floater-pill" style="background:var('+meta.color+'-bg,#f1f0f4);color:var('+meta.color+')">'+meta.task+'</span>' : '',
-    meta.project ? '<span class="floater-pill" style="background:#f1f0f4;color:var(--text-muted)">'+meta.project+'</span>' : ''
-  ].join('');
-  document.getElementById('floaterPills').innerHTML = pillsHtml;
-  const metaParts = [meta.date, meta.time, meta.duration].filter(Boolean);
-  document.getElementById('floaterMeta').textContent = metaParts.join(' · ');
+  document.getElementById('floaterPills').innerHTML =
+    '<span class="floater-pill" style="background:var('+meta.color+'-bg,#f1f0f4);color:var('+meta.color+')">'+meta.task+'</span>' +
+    '<span class="floater-pill" style="background:var('+meta.color+'-bg,#f1f0f4);color:var('+meta.color+')">'+meta.project+'</span>' +
+    '<span class="floater-pill tags">Tags</span>';
+  document.getElementById('floaterDate').textContent = meta.date;
+  document.getElementById('floaterTime').textContent = meta.time || '';
+  document.getElementById('floaterDuration').textContent = meta.duration || '';
+  f.style.borderLeftColor = 'var('+meta.color+')';
+  // LOGGED entries show a billable indicator and only a Save button.
+  // PLANNED entries show both "Log time" (convert to a real entry) and "Save" (edit the plan).
+  const isLogged = meta.type === 'LOGGED';
+  document.getElementById('floaterBillable').style.display = isLogged ? '' : 'none';
+  document.getElementById('floaterLogTimeBtn').style.display = isLogged ? 'none' : '';
   const rect = anchorEl.getBoundingClientRect();
-  const floaterWidth = 250;
+  const floaterWidth = 300;
   let left = rect.right + 10;
   if(left + floaterWidth > window.innerWidth - 12){ left = rect.left - floaterWidth - 10; }
   if(left < 12){ left = Math.min(rect.left, window.innerWidth - floaterWidth - 12); }
   let top = rect.top;
-  if(top + 160 > window.innerHeight - 12){ top = window.innerHeight - 172; }
+  if(top + 190 > window.innerHeight - 12){ top = window.innerHeight - 202; }
   f.style.left = left + 'px';
   f.style.top = top + 'px';
   f.classList.add('show');
@@ -694,28 +1016,171 @@ document.addEventListener('click', (e)=>{
 });
 
 function acceptGap(){
-  const desc = document.getElementById('descInput').value || 'Prep interview questions';
+  const projKey = document.getElementById('projectPicker').value;
+  const proj = PROJECT_OPTIONS[projKey];
+  const desc = document.getElementById('descInput').value || 'Logged time';
   const from = document.getElementById('fromTime').value;
   const to = document.getElementById('toTime').value;
+  const fromHM = parseClock(from);
+  const mins = recalcDuration();
   const marker = document.getElementById('gapMarker');
-  const top = parseFloat(marker.style.top);
-  const height = parseFloat(marker.style.height);
+  // Use the edited time range for position/height when valid; fall back to the original gap slot otherwise
+  const top = fromHM ? timeToTop(fromHM.h, fromHM.m) : parseFloat(marker.style.top);
+  const height = mins ? (mins/60)*pxPerHour : parseFloat(marker.style.height);
+  const durationLabel = mins ? formatDuration(mins) : '1h 30m';
   marker.remove();
-  addBlock('col-thu', top, height, 'test', desc, 'Hiring · Northwind Talent · '+from+' – '+to,
-    {type:'LOGGED', title:desc, task:desc, project:'Northwind Talent', color:'--c-test', date:'Thu, Jul 9', time:from+' → '+to, duration:'1h 30m'});
+  addBlock('col-thu', top, height, proj.cls, desc, proj.label+' · '+from+' – '+to,
+    {type:'LOGGED', title:desc, task:desc, project:proj.label, color:proj.color, date:'Thu, Jul 9', time:from+' → '+to, duration:durationLabel});
   closePanel();
   recovered = true;
-  showToast('Time logged — 1h 30m');
+  showToast('Time logged — '+durationLabel);
 }
 function dismissGap(){
   const marker = document.getElementById('gapMarker');
-  marker.classList.add('dismissed');
-  marker.innerHTML = '<span class="gm-label">Marked as not work time</span>';
-  marker.onclick = null;
+  marker.remove();
   closePanel();
   recovered = true;
-  showToast("Got it — won't flag this again");
+  showToast('Deleted');
 }
+
+// CLICK-TO-CREATE — replicates Toggl's existing "click blank space to backfill" flow
+const DAY_INFO = {
+  'col-mon': { label:'Mon, Jul 6' },
+  'col-tue': { label:'Tue, Jul 7' },
+  'col-wed': { label:'Wed, Jul 8' },
+  'col-thu': { label:'Thu, Jul 9' },
+  'col-fri': { label:'Fri, Jul 10' }
+};
+function formatHour12(h){
+  const disp = h % 12 === 0 ? 12 : h % 12;
+  const ampm = h < 12 ? 'AM' : 'PM';
+  return disp + ':00 ' + ampm;
+}
+let currentCreate = null;
+
+function onCellClick(colId, hour){
+  cancelCreate();
+  const col = document.getElementById(colId);
+  const top = timeToTop(hour, 0);
+  const sel = document.createElement('div');
+  sel.className = 'selection-block';
+  sel.style.top = top + 'px';
+  sel.style.height = pxPerHour + 'px';
+  sel.id = 'selectionBlock';
+  col.appendChild(sel);
+  currentCreate = { colId, hour };
+
+  document.getElementById('createLogDate').textContent = DAY_INFO[colId].label;
+  document.getElementById('createLogTime').textContent = formatHour12(hour) + ' → ' + formatHour12(hour+1);
+  document.getElementById('createLogDuration').textContent = '1h';
+  document.getElementById('createDescInput').value = '';
+  document.getElementById('createTaskSelect').value = '';
+  document.getElementById('createProjectSelect').value = '';
+  resetCreatePillStyles();
+  updateCreateSaveState();
+
+  const f = document.getElementById('createFloater');
+  const rect = sel.getBoundingClientRect();
+  const floaterWidth = 290;
+  let left = rect.right + 10;
+  if(left + floaterWidth > window.innerWidth - 12){ left = rect.left - floaterWidth - 10; }
+  if(left < 12){ left = Math.min(rect.left, window.innerWidth - floaterWidth - 12); }
+  let top2 = rect.top;
+  if(top2 + 260 > window.innerHeight - 12){ top2 = window.innerHeight - 272; }
+  if(top2 < 12) top2 = 12;
+  f.style.left = left + 'px';
+  f.style.top = top2 + 'px';
+  f.classList.add('show');
+  setTimeout(()=> document.getElementById('createDescInput').focus(), 50);
+}
+
+function resetCreatePillStyles(){
+  ['createTaskSelect','createProjectSelect'].forEach(id=>{
+    const el = document.getElementById(id);
+    el.classList.remove('filled');
+    el.style.background = '';
+    el.style.color = '';
+  });
+  document.getElementById('createFloater').style.borderLeftColor = 'var(--border)';
+}
+
+function onCreateTaskChange(){
+  const key = document.getElementById('createTaskSelect').value;
+  if(!key) return;
+  const opt = TASK_OPTIONS[key];
+  const descInput = document.getElementById('createDescInput');
+  if(!descInput.value.trim()) descInput.value = opt.label;
+  document.getElementById('createProjectSelect').value = opt.project;
+  updateCreatePillColors();
+  updateCreateSaveState();
+}
+function onCreateProjectChange(){
+  updateCreatePillColors();
+}
+function updateCreatePillColors(){
+  const projKey = document.getElementById('createProjectSelect').value;
+  const taskEl = document.getElementById('createTaskSelect');
+  const projEl = document.getElementById('createProjectSelect');
+  if(!projKey){
+    resetCreatePillStyles();
+    return;
+  }
+  const proj = PROJECT_OPTIONS[projKey];
+  [taskEl, projEl].forEach(el=>{
+    el.classList.add('filled');
+    el.style.background = 'var('+proj.color+'-bg)';
+    el.style.color = 'var('+proj.color+')';
+  });
+  document.getElementById('createFloater').style.borderLeftColor = 'var('+proj.color+')';
+}
+function updateCreateSaveState(){
+  const desc = document.getElementById('createDescInput').value.trim();
+  const btn = document.getElementById('createSaveBtn');
+  if(desc){
+    btn.classList.add('active');
+    btn.textContent = 'Log time · 1h';
+  } else {
+    btn.classList.remove('active');
+    btn.textContent = 'Log time';
+  }
+}
+
+function cancelCreate(){
+  const sel = document.getElementById('selectionBlock');
+  if(sel) sel.remove();
+  document.getElementById('createFloater').classList.remove('show');
+  currentCreate = null;
+}
+
+function saveCreate(){
+  const desc = document.getElementById('createDescInput').value.trim();
+  if(!desc || !currentCreate) return;
+  const projKey = document.getElementById('createProjectSelect').value || 'none';
+  const proj = PROJECT_OPTIONS[projKey];
+  const { colId, hour } = currentCreate;
+  const top = timeToTop(hour, 0);
+  const height = pxPerHour;
+  const fromLabel = formatHour12(hour), toLabel = formatHour12(hour+1);
+  const sel = document.getElementById('selectionBlock');
+  if(sel) sel.remove();
+  addBlock(colId, top, height, proj.cls, desc, proj.label+' · '+fromLabel+' – '+toLabel,
+    {type:'LOGGED', title:desc, task:desc, project:proj.label, color:proj.color,
+     date:DAY_INFO[colId].label, time:fromLabel+' → '+toLabel, duration:'1h'});
+  document.getElementById('createFloater').classList.remove('show');
+  currentCreate = null;
+  showToast('Time logged — 1h');
+}
+
+document.getElementById('createDescInput').addEventListener('input', updateCreateSaveState);
+document.getElementById('createTaskSelect').addEventListener('change', onCreateTaskChange);
+document.getElementById('createProjectSelect').addEventListener('change', onCreateProjectChange);
+document.addEventListener('click', (e)=>{
+  const cf = document.getElementById('createFloater');
+  if(cf.classList.contains('show') && !cf.contains(e.target) && !e.target.closest('.hour-cell')){
+    cancelCreate();
+  }
+});
+
 function resetDemo(){ location.reload(); }
 </script>
 
