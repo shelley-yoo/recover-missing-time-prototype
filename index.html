@@ -769,7 +769,7 @@
     <input type="text" class="desc-input" id="descInput" value="Revise homepage copy">
   </div>
   <div class="panel-foot">
-    <button class="btn btn-ghost" onclick="dismissGap()">Delete</button>
+    <button class="btn btn-ghost" onclick="dismissGap()">Dismiss</button>
     <button class="btn btn-primary" onclick="acceptGap()">Log time</button>
   </div>
 </div>
@@ -1030,12 +1030,20 @@ addCalendarBlock('col-thu', timeToTop(14,0), 28, 'Design sync',
 
 // (Kimchi Digital's planned-but-unlogged item lives in the all-day strip above, matching the real product's pattern)
 
+// Bounds the right side of the Thursday gap, so it's genuinely "between two activity points" — not just the tail of the day
+addBlock('col-thu', timeToTop(15,15), 28, 'admin', 'Slack catch-up', 'Admin & Comms',
+  {type:'LOGGED', title:'Slack catch-up', task:'Slack catch-up', project:'Admin & Comms', color:'--c-admin', date:'Thu, Jul 9', time:'3:15 PM → 3:45 PM', duration:'30m'});
+
 // Friday context — a couple of other meetings, then a wide-open stretch of the day
 addBlock('col-fri', timeToTop(9,0), 30, 'admin', 'Standup', 'Admin & Comms',
   {type:'LOGGED', title:'Standup', task:'Standup', project:'Admin & Comms', color:'--c-admin', date:'Fri, Jul 10', time:'9:00 AM → 9:30 AM', duration:'30m'});
 addBlock('col-fri', timeToTop(12,0), 30, 'internal', 'Client check-in', 'Kimchi Digital',
   {type:'LOGGED', title:'Client check-in', task:'Client check-in', project:'Kimchi Digital', color:'--c-internal', date:'Fri, Jul 10', time:'12:00 PM → 12:30 PM', duration:'30m'});
 // (Content editing is planned for today with a 3h estimate — see the chip above — but never got a time slot)
+
+// Bounds the right side of the Friday gap
+addBlock('col-fri', timeToTop(17,0), 30, 'admin', 'Wrap-up', 'Admin & Comms',
+  {type:'LOGGED', title:'Wrap-up', task:'Wrap-up', project:'Admin & Comms', color:'--c-admin', date:'Fri, Jul 10', time:'5:00 PM → 5:30 PM', duration:'30m'});
 
 // GAP MARKERS — colored to match each gap's top-suggested project (light = not yet logged)
 const RGB_MAP = { '--c-internal':'194,24,91', '--c-new':'217,131,36', '--c-test':'138,75,18', '--c-admin':'61,107,79', '--c-focus':'91,79,196' };
@@ -1333,7 +1341,7 @@ function dismissGap(){
   marker.remove();
   closePanel();
   resolvedGaps[currentGapId] = true;
-  showToast('Deleted');
+  showToast('Dismissed');
 }
 
 // CLICK-TO-CREATE — replicates Toggl's existing "click blank space to backfill" flow
