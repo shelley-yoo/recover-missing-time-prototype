@@ -683,7 +683,9 @@
         <div class="day-head"><div class="dname">Fri</div><div class="dnum">10</div></div>
 
         <div class="allday-cell allday-label"></div>
-        <div class="allday-cell"></div>
+        <div class="allday-cell">
+          <div class="chip new" data-type="planned" data-task="portfolio"><b>Portfolio update</b> · <span class="sub">UStudio</span></div>
+        </div>
         <div class="allday-cell">
           <div class="chip internal" data-task="clientcall"><b>Client call</b> · <span class="sub">Kimchi Digital</span></div>
         </div>
@@ -692,6 +694,7 @@
         </div>
         <div class="allday-cell">
           <div class="chip internal" data-type="planned" data-task="revise"><b>Revise homepage copy</b> · <span class="sub">Kimchi Digital</span></div>
+          <div class="chip admin" data-type="planned" data-task="invoice"><b>Send invoice</b> · <span class="sub">Admin & Comms</span></div>
         </div>
         <div class="allday-cell">
           <div class="chip focus" data-task="focustime"><b>Focus time</b> · <span class="sub">No project</span></div>
@@ -1032,8 +1035,8 @@ addCalendarBlock('col-thu', timeToTop(14,0), 28, 'Design sync',
 // (Kimchi Digital's planned-but-unlogged item lives in the all-day strip above, matching the real product's pattern)
 
 // Bounds the right side of the Thursday gap, so it's genuinely "between two activity points" — not just the tail of the day
-addBlock('col-thu', timeToTop(15,15), 28, 'admin', 'Slack catch-up', 'Admin & Comms',
-  {type:'LOGGED', title:'Slack catch-up', task:'Slack catch-up', project:'Admin & Comms', color:'--c-admin', date:'Thu, Jul 9', time:'3:15 PM → 3:45 PM', duration:'30m'});
+addBlock('col-thu', timeToTop(14,30), 30, 'admin', 'Slack catch-up', 'Admin & Comms',
+  {type:'LOGGED', title:'Slack catch-up', task:'Slack catch-up', project:'Admin & Comms', color:'--c-admin', date:'Thu, Jul 9', time:'2:30 PM → 3:00 PM', duration:'30m'});
 
 // Wednesday context — a couple of other meetings, then a wide-open stretch of the day.
 // This is the day BEFORE today (Thursday), which is what "prior working day" detection actually means —
@@ -1071,9 +1074,9 @@ function createGapMarker(gapId, colId, top, height, colorVar){
 // Gap configs — each gap has its own suggestion, default range, and note text
 const GAP_CONFIGS = {
   'thu-gap': {
-    colId:'col-thu', markerTop:timeToTop(14,30), markerHeight:42, colorVar:'--c-internal',
-    fromLabel:'2:30 PM', toLabel:'3:15 PM', defaultTask:'revise', defaultProject:'kimchi',
-    note:"Thursday 2:30 PM – 3:15 PM doesn't have a timer or a plan. Here's what it might have been — edit anything that's off."
+    colId:'col-thu', markerTop:timeToTop(11,30), markerHeight:112, colorVar:'--c-internal',
+    fromLabel:'12:00 PM', toLabel:'1:00 PM', defaultTask:'revise', defaultProject:'kimchi',
+    note:"Thursday 12:00 PM – 1:00 PM doesn't have a timer or a plan. Kimchi Digital work is a likely fit — but the open window actually runs from 11:30 AM to 1:30 PM, so widen the time if this doesn't cover it all."
   },
   'wed-gap': {
     colId:'col-wed', markerTop:timeToTop(13,0), markerHeight:224, colorVar:'--c-new',
@@ -1090,7 +1093,9 @@ const TASK_DETAILS = {
   clientcall: { title:'Client call',           project:'Kimchi Digital', color:'--c-internal', date:'Jul 7',  estimate:'–', priority:'Empty', entries:1 },
   revise:     { title:'Revise homepage copy',  project:'Kimchi Digital', color:'--c-internal', date:'Jul 9',  estimate:'–', priority:'Empty', entries:0 },
   content:    { title:'Content editing',       project:'UStudio',        color:'--c-new',      date:'Jul 8', estimate:'3h', priority:'High',  entries:0 },
-  focustime:  { title:'Focus time',            project:'No project',     color:'--c-focus',    date:'Jul 10', estimate:'–', priority:'Empty', entries:0 }
+  focustime:  { title:'Focus time',            project:'No project',     color:'--c-focus',    date:'Jul 10', estimate:'–', priority:'Empty', entries:0 },
+  portfolio:  { title:'Portfolio update',      project:'UStudio',        color:'--c-new',      date:'Jul 6',  estimate:'2h', priority:'Medium', entries:0 },
+  invoice:    { title:'Send invoice',          project:'Admin & Comms',  color:'--c-admin',    date:'Jul 9',  estimate:'–', priority:'Empty', entries:0 }
 };
 let currentTaskKey = null;
 
