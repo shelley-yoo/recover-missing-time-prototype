@@ -205,6 +205,10 @@
   .block.new{ background:var(--c-new); color:#fff; }
   .block.test{ background:var(--c-test); color:#fff; }
   .block.focus{ background:var(--c-focus); color:#fff; }
+  .block.planned-time{
+    background:var(--pt-bg, var(--c-test-bg)); color:var(--pt-fg, var(--c-test));
+    border:1.5px dashed var(--pt-fg, var(--c-test)); box-shadow:none;
+  }
   .block.cal-event{
     background:#c98b85; color:#fff; display:flex; align-items:center; justify-content:space-between; gap:6px;
   }
@@ -804,7 +808,7 @@
     </span>
   </div>
   <div class="floater-foot">
-    <button class="floater-logtime" id="floaterLogTimeBtn" onclick="closeFloater()">Log time</button>
+    <button class="floater-logtime" id="floaterLogTimeBtn" onclick="handleFloaterLogTime()">Log time</button>
     <button class="floater-save" id="floaterSaveBtn" onclick="closeFloater()">Save</button>
   </div>
 </div>
@@ -1009,6 +1013,21 @@ function addCalendarBlock(colId, top, height, title, meta){
   return b;
 }
 
+function addPlannedBlock(colId, top, height, cls, title, sub, meta){
+  const col = document.getElementById(colId);
+  const b = document.createElement('div');
+  b.className = 'block planned-time';
+  b.style.top = top+'px';
+  b.style.height = Math.max(height,26)+'px';
+  b.style.setProperty('--pt-bg', 'var('+meta.color+'-bg)');
+  b.style.setProperty('--pt-fg', 'var('+meta.color+')');
+  b.innerHTML = title + (sub ? '<div class="sub">'+sub+'</div>' : '');
+  b.dataset.loggedCls = cls; // the solid class this block becomes once "Log time" is clicked
+  b.onclick = (e)=>{ e.stopPropagation(); openFloater(b, meta); };
+  col.appendChild(b);
+  return b;
+}
+
 buildHours();
 ['col-mon','col-tue','col-wed','col-thu','col-fri'].forEach(buildDayCells);
 
@@ -1050,6 +1069,10 @@ addBlock('col-wed', timeToTop(12,0), 30, 'internal', 'Client check-in', 'Kimchi 
 // Bounds the right side of the Wednesday gap
 addBlock('col-wed', timeToTop(17,0), 30, 'admin', 'Wrap-up', 'Admin & Comms',
   {type:'LOGGED', title:'Wrap-up', task:'Wrap-up', project:'Admin & Comms', color:'--c-admin', date:'Wed, Jul 8', time:'5:00 PM → 5:30 PM', duration:'30m'});
+
+// A real time-slotted PLANNED block — light until logged, then turns solid like any other logged entry
+addPlannedBlock('col-wed', timeToTop(9,30), 56, 'test', 'Sprint planning', 'Northwind Talent',
+  {type:'PLANNED', title:'Sprint planning', task:'Sprint planning', project:'Northwind Talent', color:'--c-test', date:'Wed, Jul 8', time:'9:30 AM → 10:30 AM', duration:'1h'});
 
 // GAP MARKERS — colored to match each gap's top-suggested project (light = not yet logged)
 const RGB_MAP = { '--c-internal':'194,24,91', '--c-new':'217,131,36', '--c-test':'138,75,18', '--c-admin':'61,107,79', '--c-focus':'91,79,196' };
@@ -1277,8 +1300,13 @@ function showToast(text){
 }
 
 // FLOATER — read-only info card for existing blocks/chips
+let currentFloaterEl = null;
+let currentFloaterMeta = null;
+
 function openFloater(anchorEl, meta){
   const f = document.getElementById('floater');
+  currentFloaterEl = anchorEl;
+  currentFloaterMeta = meta;
   const isCalendar = meta.type === 'CALENDAR';
   document.getElementById('floaterCalIcon').style.display = isCalendar ? '' : 'none';
   document.getElementById('floaterType').textContent = isCalendar ? 'Calendar event' : meta.type;
@@ -1322,6 +1350,20 @@ document.addEventListener('click', (e)=>{
   const f = document.getElementById('floater');
   if(f.classList.contains('show') && !f.contains(e.target)){ closeFloater(); }
 });
+
+function handleFloaterLogTime(){
+  if(currentFloaterEl && currentFloaterEl.classList.contains('planned-time')){
+    const el = currentFloaterEl;
+    const loggedCls = el.dataset.loggedCls;
+    el.classList.remove('planned-time');
+    el.classList.add(loggedCls);
+    el.style.removeProperty('--pt-bg');
+    el.style.removeProperty('--pt-fg');
+    currentFloaterMeta.type = 'LOGGED';
+    showToast('Time logged — '+(currentFloaterMeta.duration || ''));
+  }
+  closeFloater();
+}
 
 function acceptGap(){
   const cfg = GAP_CONFIGS[currentGapId];
